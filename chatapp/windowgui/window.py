@@ -6,13 +6,10 @@ class Window:
         self.screen = pygame.display.set_mode(screen_size)
         self.clock = pygame.time.Clock()
         self.fps = 60
-        self.ui = {}
+        self.ui_group = None
         self.running = False
         self.bg_color = Colors.RED
     
-    def input_handler(self, id):
-        pass
-
     def start(self):
         self.running = True
         while self.running:
@@ -20,24 +17,19 @@ class Window:
         pygame.quit()
     
     def eventloop(self, event):
-        for element in self.ui.values():
-            element.eventloop(event)
+        if self.ui_group:
+            self.ui_group.eventloop(event)
 
         if event.type == pygame.QUIT:
             self.running = False
     
     def update(self):
-        for element in self.ui.values():
-            element.update()
 
         for event in pygame.event.get():
             self.eventloop(event)
         
-        for id,element in self.ui:
-            element.render(self.screen)
-            if element.active:
-                self.input_handler(id)
-
+        if self.ui_group:
+            self.ui_group.update()
 
         pygame.display.update()
         self.screen.fill(self.bg_color)

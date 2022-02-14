@@ -20,7 +20,6 @@ class Text:
         if self.font_file == None:
             self.font_file = self.FONT
         self.font = pygame.font.Font(self.font_file, self.size)
-        print(self.font_file)
     
     def add(self, string):
         self.string = self.string + string
