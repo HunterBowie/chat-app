@@ -9,6 +9,7 @@ class Button(UIElement):
     def __init__(self, x, y, width, height, color_name, top_img=None):
         self.rect = pygame.Rect(x, y, width, height)
         self.clicked = False
+        self.active = False
         self.top_img = top_img
         self.top_img_x = self.top_img_y = 0
         if self.top_img:
@@ -17,7 +18,9 @@ class Button(UIElement):
             
         self._img_up = Textures.get(Textures.BUTTON_UP, (width, height), color_name)
         self._img_down = Textures.get(Textures.BUTTON_DOWN, (width, height-4), color_name)
-        
+    
+    def update(self):
+        self.active = False
         
     
     def eventloop(self, event):
@@ -26,6 +29,7 @@ class Button(UIElement):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.rect.collidepoint(pos):
                 self.clicked = True
+                self.active = True
 
 
     def render(self, surface):

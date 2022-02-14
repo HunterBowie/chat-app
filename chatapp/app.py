@@ -7,16 +7,18 @@ from .windowgui.ui import Button
 from .interfaces import START_UI
 
 
-class App:
+class App(Window):
     def __init__(self):
-        self.window = Window(Constants.SCREEN_SIZE)
-        self.window.bg_color = Colors.WHITE
+        super().__init__(Constants.SCREEN_SIZE)
+        self.bg_color = Colors.WHITE
         pygame.display.set_caption("Chat App")
         Text.FONT = ROUNDED_FONT
-
-        self.window.ui = START_UI
-
-        
-
-    def start(self):
-        self.window.start()
+        self.ui = START_UI
+    
+    def input_handler(self, id):
+        if id == "host_button":
+            print("hosting")
+    
+    def update(self):
+        super().update()
+    
