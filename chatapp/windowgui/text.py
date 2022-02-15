@@ -35,6 +35,9 @@ class Text:
     def get_height(self):
         return self.get_surf().get_height()
     
+    def get_rect(self):
+        return pygame.Rect(self.x, self.y, self.get_width(), self.get_height())
+    
     def get_surf(self):
         self.font = pygame.font.Font(self.font_file, self.size)
         return self.font.render(self.string, self.antialias, self.color)
@@ -52,8 +55,6 @@ class Text:
         self.center_x(rect)
         self.center_y(rect)
     
-    def get(self):
-        return self.string
     
     def set(self, string):
         self.string = string

@@ -1,15 +1,18 @@
-import pygame
-from .util import Textures
+import pygame, pyperclip
+from .util import Textures, Colors
+from .text import Text, get_text_size
+from .constants import Constants
+from .timers import RealTimer
 
 class UIElement:
-    def __init__(self):
-        pass
+    def __init__(self, command, x, y, width, height):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.command = command
 
 class Button(UIElement):
-    def __init__(self, x, y, width, height, color_name, top_img=None):
-        self.rect = pygame.Rect(x, y, width, height)
+    def __init__(self, command, x, y, width, height, color_name="white", top_img=None):
+        super().__init__(command, x, y, width, height)
         self.clicked = False
-        self.triggered = False
         self.top_img = top_img
         self.top_img_x = self.top_img_y = 0
         if self.top_img:
@@ -25,15 +28,17 @@ class Button(UIElement):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.rect.collidepoint(pos):
                 self.clicked = True
-                self.triggered = True
-        
-
-    def render(self, surface):
-        self.triggered = False
+                self.command()
+    
+    def update(self):
         pos = pygame.mouse.get_pos()
         if not pygame.mouse.get_pressed() == (1, 0, 0):
             self.clicked = False
                 
+        
+
+    def render(self, surface):
+        
         if self.clicked:
             surface.blit(self._img_down, self.rect.topleft)
         else:   
@@ -50,7 +55,98 @@ class Slider(UIElement):
     pass
 
 class TextBox(UIElement):
-    pass
+    def __init__(self, command, x, y, width, height, font_size=30, border=True):
+        super().__init__(command, x, y, width, height)
+        self.text = Text(Constants.TEXT_BOX_MARGIN, 0, "", size=font_size)
+        self.text.center_y(pygame.Rect(0, 0, width, height))
+        self.border = border
+        self.selected = False
+        self.cursor_blink = True
+        self.cursor_timer = RealTimer()
+
+        self.backspace_count = 0
+
+
+    def is_appendable(self, string):
+        text_size = get_text_size(self.text.string + string, size=self.text.size)
+        if text_size[0] >= (self.rect.width-Constants.TEXT_BOX_MARGIN*2):
+            return False
+        return True
+    
+
+    def eventloop(self, event):
+        keys = pygame.key.get_pressed()
+        pos = pygame.mouse.get_pos()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.rect.collidepoint(pos):
+                self.selected = True
+            else:
+                self.selected = False
+
+        if self.selected:
+            if event.type == pygame.KEYDOWN:
+                key_name = pygame.key.name(event.key)
+                if key_name == "space":
+                    if self.is_appendable(" "):
+                        self.text.add(" ")
+                elif key_name == "backspace":
+                    if self.text.string:
+                        self.text.pop()
+                elif key_name == "return":
+                    self.command()
+                elif key_name == "v" and event.mod and pygame.KMOD_CTRL:
+                    if self.is_appendable(pyperclip.paste()):
+                        self.text.add(pyperclip.paste())
+
+                elif len(key_name) == 1:
+                    if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]:
+                        key_name = key_name.upper()
+                        if key_name in Constants.TEXT_BOX_SHIFT_CHARS.keys():
+                            key_name = Constants.TEXT_BOX_SHIFT_CHARS[key_name]
+                    if self.is_appendable(key_name):
+                        self.text.add(key_name)
+
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_BACKSPACE:
+                    self.backspace_count = 0
+    
+    def update(self):
+        keys = pygame.key.get_pressed()
+        if self.selected:
+            if keys[pygame.K_BACKSPACE]:
+                self.backspace_count += 1
+                if self.backspace_count == Constants.TEXT_BOX_BACKSPACE_SPEED:
+                    self.backspace_count = 0
+                    if self.text.string:
+                        self.text.pop()
+        
+        
+    def render(self, surface):
+       
+        # render box -Constants.TEXT_BOX_BORDER_WIDTH
+        width = Constants.TEXT_BOX_BORDER_WIDTH
+        white_rect = pygame.Rect(self.rect.x-width, self.rect.y-width, self.rect.width-width, self.rect.height-width)
+        pygame.draw.rect(surface, Colors.BLACK, self.rect)
+        pygame.draw.rect(surface, Colors.WHITE, white_rect)
+        # self.text.render(box_surf)
+        
+        
+        # render cursor
+        if self.selected:
+            x = self.rect.x+Constants.TEXT_BOX_MARGIN+self.text.get_width()
+            string = ""
+            if self.cursor_blink:
+                string = "|"
+            
+
+            if self.cursor_timer.passed(Constants.TEXT_BOX_CURSOR_BLINK_TIME):
+                self.cursor_timer.reset()
+                self.cursor_blink = not self.cursor_blink
+            
+
+            text = Text(x, 0, string)
+            text.center_y(self.rect)
+            text.render(surface)
 
 
 
@@ -65,10 +161,7 @@ class UIGroup:
     
     def update(self):
         for id in self.ui:
-            if self.ui[id].triggered:
-                self.handler_input(id)
+            self.ui[id].update()
             self.ui[id].render(self.window.screen)
 
-    def handler_input(self, id):
-        pass
 
