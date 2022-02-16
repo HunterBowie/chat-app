@@ -3,10 +3,10 @@ import pygame, time
 
 class RealTimer:
     def __init__(self):
-        self.reset()
+        self.stop()
     
     def start(self):
-        self.start_stop_timer = time.monotonic()
+        self.reset()
     
     def get(self):
         if self.start_stop_timer == -1:
@@ -14,10 +14,16 @@ class RealTimer:
         return int(time.monotonic()-self.start_stop_timer)
     
     def reset(self):
+        self.start_stop_timer = time.monotonic()
+
+    def stop(self):
         self.start_stop_timer = -1
     
     def passed(self, seconds):
         return self.get() >= seconds
+    
+    def __repr__(self):
+        return f"time: {self.get()}"
     
 
 class GameTimer:
@@ -38,6 +44,8 @@ class GameTimer:
     
     def passed(self, seconds):
         return self.get() >= seconds
+    
+
     
 
 

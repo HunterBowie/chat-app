@@ -55,15 +55,15 @@ class Slider(UIElement):
     pass
 
 class TextBox(UIElement):
-    def __init__(self, command, x, y, width, height, font_size=30, border=True):
+    def __init__(self, command, x, y, width, height, font_size=25, border=True):
         super().__init__(command, x, y, width, height)
-        self.text = Text(Constants.TEXT_BOX_MARGIN, 0, "", size=font_size)
-        self.text.center_y(pygame.Rect(0, 0, width, height))
+        self.text = Text(0, 0, "", size=font_size)
+        
         self.border = border
         self.selected = False
         self.cursor_blink = True
         self.cursor_timer = RealTimer()
-
+        self.cursor_timer.start()
         self.backspace_count = 0
 
 
@@ -85,6 +85,7 @@ class TextBox(UIElement):
 
         if self.selected:
             if event.type == pygame.KEYDOWN:
+                hit_key = True
                 key_name = pygame.key.name(event.key)
                 if key_name == "space":
                     if self.is_appendable(" "):
@@ -94,23 +95,31 @@ class TextBox(UIElement):
                         self.text.pop()
                 elif key_name == "return":
                     self.command()
-                elif key_name == "v" and event.mod and pygame.KMOD_CTRL:
-                    if self.is_appendable(pyperclip.paste()):
-                        self.text.add(pyperclip.paste())
 
                 elif len(key_name) == 1:
+                    string_data = key_name
                     if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]:
-                        key_name = key_name.upper()
+                        string_data = key_name.upper()
                         if key_name in Constants.TEXT_BOX_SHIFT_CHARS.keys():
-                            key_name = Constants.TEXT_BOX_SHIFT_CHARS[key_name]
-                    if self.is_appendable(key_name):
-                        self.text.add(key_name)
+                            string_data = Constants.TEXT_BOX_SHIFT_CHARS[key_name]
+                        elif key_name == "v" and event.mod and pygame.KMOD_CTRL:
+                            if self.is_appendable(pyperclip.paste()):
+                                string_data = pyperclip.paste()
+                    if self.is_appendable(string_data):
+                        self.text.add(string_data)
+                else:
+                    hit_key = False
+                
+                if hit_key:
+                    self.cursor_timer.reset()
+                    self.cursor_blink = True
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_BACKSPACE:
                     self.backspace_count = 0
     
     def update(self):
+        self.text.center_y(pygame.Rect(0, 0, self.rect.width, self.rect.height))
         keys = pygame.key.get_pressed()
         if self.selected:
             if keys[pygame.K_BACKSPACE]:
@@ -122,13 +131,16 @@ class TextBox(UIElement):
         
         
     def render(self, surface):
-       
-        # render box -Constants.TEXT_BOX_BORDER_WIDTH
         width = Constants.TEXT_BOX_BORDER_WIDTH
-        white_rect = pygame.Rect(self.rect.x-width, self.rect.y-width, self.rect.width-width, self.rect.height-width)
+        white_rect = pygame.Rect(int(self.rect.x+width/2), int(self.rect.y+width/2), self.rect.width-width, self.rect.height-width)
         pygame.draw.rect(surface, Colors.BLACK, self.rect)
         pygame.draw.rect(surface, Colors.WHITE, white_rect)
-        # self.text.render(box_surf)
+        surf = pygame.Surface((self.rect.width, self.rect.height), pygame.SRCALPHA)
+        self.text.render(surf)
+        surface.blit(surf, (self.rect.x + Constants.TEXT_BOX_MARGIN, self.rect.y))
+
+
+        
         
         
         # render cursor
@@ -138,7 +150,6 @@ class TextBox(UIElement):
             if self.cursor_blink:
                 string = "|"
             
-
             if self.cursor_timer.passed(Constants.TEXT_BOX_CURSOR_BLINK_TIME):
                 self.cursor_timer.reset()
                 self.cursor_blink = not self.cursor_blink

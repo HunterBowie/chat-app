@@ -1,9 +1,7 @@
 import pygame
 from .util import DEFAULT_FONT
 
-def get_text_size(string, size=30, font_file=pygame.font.get_default_font()):
-    t = Text(0, 0, string, font_file, size)
-    return t.get_width(), t.get_height()
+
 
 class Text:
     FONT = DEFAULT_FONT
@@ -54,9 +52,9 @@ class Text:
     def center(self, rect):
         self.center_x(rect)
         self.center_y(rect)
-    
-    
-    def set(self, string):
-        self.string = string
-    
-    
+
+def get_text_size(string, size=30, font_file=None):
+    if not font_file:
+        font_file = Text.FONT
+    t = Text(0, 0, string, font_file, size)
+    return t.get_width(), t.get_height()
