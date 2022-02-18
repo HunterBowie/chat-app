@@ -4,11 +4,27 @@ from .text import Text, get_text_size
 from .constants import Constants
 from .timers import RealTimer
 
+class UIEvent:
+    BUTTON_CLICK = pygame.USEREVENT 
+    TEXTBOX_POST = pygame.USEREVENT + 1
+
+
+
+
+
+
 class UIElement:
     def __init__(self, id, x, y, width, height):
         self.rect = pygame.Rect(x, y, width, height)
         self.id = id
-        self.data = {"text": "", "pos": (0, 0)}
+
+    def post_event(self, event_type):
+        event_data = {
+            "ui_element": self,
+            "ui_id": self.id,
+        }
+        pygame.event.post(pygame.event.Event(event_type, event_data))
+                
 
 class Button(UIElement):
     def __init__(self, id, x, y, width, height, color_name="white", top_img=None):
@@ -29,7 +45,7 @@ class Button(UIElement):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.rect.collidepoint(pos):
                 self.clicked = True
-                # trigger 
+                self.post_event(UIEvent.BUTTON_CLICK) 
     
     def update(self):
         pos = pygame.mouse.get_pos()
@@ -70,7 +86,7 @@ class TextBox(UIElement):
 
     def is_appendable(self, string):
         text_size = get_text_size(self.text.string + string, size=self.text.size)
-        if text_size[0] >= (self.rect.width-Constants.TEXT_BOX_MARGIN*2):
+        if text_size[0] >= (self.rect.width-Constants.TEXTBOX_MARGIN*2):
             return False
         return True
     
@@ -95,14 +111,14 @@ class TextBox(UIElement):
                     if self.text.string:
                         self.text.pop()
                 elif key_name == "return":
-                    pass # trigger
+                    self.post_event(UIEvent.TEXTBOX_POST)
 
                 elif len(key_name) == 1:
                     string_data = key_name
                     if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]:
                         string_data = key_name.upper()
-                        if key_name in Constants.TEXT_BOX_SHIFT_CHARS.keys():
-                            string_data = Constants.TEXT_BOX_SHIFT_CHARS[key_name]
+                        if key_name in Constants.TEXTBOX_SHIFT_CHARS.keys():
+                            string_data = Constants.TEXTBOX_SHIFT_CHARS[key_name]
                         elif key_name == "v" and event.mod and pygame.KMOD_CTRL:
                             if self.is_appendable(pyperclip.paste()):
                                 string_data = pyperclip.paste()
@@ -125,22 +141,20 @@ class TextBox(UIElement):
         if self.selected:
             if keys[pygame.K_BACKSPACE]:
                 self.backspace_count += 1
-                if self.backspace_count == Constants.TEXT_BOX_BACKSPACE_SPEED:
+                if self.backspace_count == Constants.TEXTBOX_BACKSPACE_SPEED:
                     self.backspace_count = 0
                     if self.text.string:
                         self.text.pop()
-        
-        self.data["text"] = self.text.string
-        
+                
         
     def render(self, surface):
-        width = Constants.TEXT_BOX_BORDER_WIDTH
+        width = Constants.TEXTBOX_BORDER_WIDTH
         white_rect = pygame.Rect(int(self.rect.x+width/2), int(self.rect.y+width/2), self.rect.width-width, self.rect.height-width)
         pygame.draw.rect(surface, Colors.BLACK, self.rect)
         pygame.draw.rect(surface, Colors.WHITE, white_rect)
         surf = pygame.Surface((self.rect.width, self.rect.height), pygame.SRCALPHA)
         self.text.render(surf)
-        surface.blit(surf, (self.rect.x + Constants.TEXT_BOX_MARGIN, self.rect.y))
+        surface.blit(surf, (self.rect.x + Constants.TEXTBOX_MARGIN, self.rect.y))
 
 
         
@@ -148,12 +162,12 @@ class TextBox(UIElement):
         
         # render cursor
         if self.selected:
-            x = self.rect.x+Constants.TEXT_BOX_MARGIN+self.text.get_width()
+            x = self.rect.x+Constants.TEXTBOX_MARGIN+self.text.get_width()
             string = ""
             if self.cursor_blink:
                 string = "|"
             
-            if self.cursor_timer.passed(Constants.TEXT_BOX_CURSOR_BLINK_TIME):
+            if self.cursor_timer.passed(Constants.TEXTBOX_CURSOR_BLINK_TIME):
                 self.cursor_timer.reset()
                 self.cursor_blink = not self.cursor_blink
             
@@ -167,15 +181,21 @@ class TextBox(UIElement):
 class UIManager:
     def __init__(self, window):
         self.window = window
-        self.ui = {}
+        self.ui = []
+    
+    def get_element(self, id):
+        for element in self.ui:
+            if element.id == id:
+                return element
+        raise ValueError(f"no element with id: {id}")
 
     def eventloop(self, event):
-        for id in self.ui:
-            self.ui[id].eventloop(event)
+        for element in self.ui:
+            element.eventloop(event)
     
     def update(self):
-        for id in self.ui:
-            self.ui[id].update()
-            self.ui[id].render(self.window.screen)
+        for element in self.ui:
+            element.update()
+            element.render(self.window.screen)
 
 

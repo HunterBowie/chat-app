@@ -14,7 +14,7 @@ class App(Window):
         Text.FONT = ROUNDED_FONT
         self.bg_color = Colors.WHITE
 
-        self.ui_group = StartUI(self)
+        self.ui_manager = StartUI(self)
 
     
     def update(self):

@@ -6,7 +6,7 @@ class Window:
         self.screen = pygame.display.set_mode(screen_size)
         self.clock = pygame.time.Clock()
         self.fps = 60
-        self.ui_group = None
+        self.ui_manager = None
         self.running = False
         self.bg_color = Colors.RED
     
@@ -17,8 +17,8 @@ class Window:
         pygame.quit()
     
     def eventloop(self, event):
-        if self.ui_group:
-            self.ui_group.eventloop(event)
+        if self.ui_manager:
+            self.ui_manager.eventloop(event)
 
         if event.type == pygame.QUIT:
             self.running = False
@@ -28,8 +28,8 @@ class Window:
         for event in pygame.event.get():
             self.eventloop(event)
         
-        if self.ui_group:
-            self.ui_group.update()
+        if self.ui_manager:
+            self.ui_manager.update()
 
         pygame.display.update()
         self.screen.fill(self.bg_color)
