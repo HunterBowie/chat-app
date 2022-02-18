@@ -15,6 +15,7 @@ class App(Window):
         self.bg_color = Colors.WHITE
 
         self.ui_group = StartUI(self)
+
     
     def update(self):
 

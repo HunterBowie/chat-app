@@ -5,13 +5,14 @@ from .constants import Constants
 from .timers import RealTimer
 
 class UIElement:
-    def __init__(self, command, x, y, width, height):
+    def __init__(self, id, x, y, width, height):
         self.rect = pygame.Rect(x, y, width, height)
-        self.command = command
+        self.id = id
+        self.data = {"text": "", "pos": (0, 0)}
 
 class Button(UIElement):
-    def __init__(self, command, x, y, width, height, color_name="white", top_img=None):
-        super().__init__(command, x, y, width, height)
+    def __init__(self, id, x, y, width, height, color_name="white", top_img=None):
+        super().__init__(id, x, y, width, height)
         self.clicked = False
         self.top_img = top_img
         self.top_img_x = self.top_img_y = 0
@@ -28,7 +29,7 @@ class Button(UIElement):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.rect.collidepoint(pos):
                 self.clicked = True
-                self.command()
+                # trigger 
     
     def update(self):
         pos = pygame.mouse.get_pos()
@@ -55,8 +56,8 @@ class Slider(UIElement):
     pass
 
 class TextBox(UIElement):
-    def __init__(self, command, x, y, width, height, font_size=25, border=True):
-        super().__init__(command, x, y, width, height)
+    def __init__(self, id, x, y, width, height, font_size=25, border=True):
+        super().__init__(id, x, y, width, height)
         self.text = Text(0, 0, "", size=font_size)
         
         self.border = border
@@ -94,7 +95,7 @@ class TextBox(UIElement):
                     if self.text.string:
                         self.text.pop()
                 elif key_name == "return":
-                    self.command()
+                    pass # trigger
 
                 elif len(key_name) == 1:
                     string_data = key_name
@@ -129,6 +130,8 @@ class TextBox(UIElement):
                     if self.text.string:
                         self.text.pop()
         
+        self.data["text"] = self.text.string
+        
         
     def render(self, surface):
         width = Constants.TEXT_BOX_BORDER_WIDTH
@@ -161,7 +164,7 @@ class TextBox(UIElement):
 
 
 
-class UIGroup:
+class UIManager:
     def __init__(self, window):
         self.window = window
         self.ui = {}
