@@ -14,8 +14,10 @@ class Window:
         self.running = True
         while self.running:
             self.update()
+        self.ui_manager.stop()
         pygame.quit()
-    
+
+
     def eventloop(self, event):
         if self.ui_manager:
             self.ui_manager.eventloop(event)

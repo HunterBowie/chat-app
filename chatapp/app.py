@@ -1,6 +1,6 @@
 import pygame
 from .windowgui.window import Window
-from .windowgui.util import Colors, root_pos, ROUNDED_FONT
+from .windowgui.util import Colors, ROUNDED_FONT
 from .windowgui.text import Text
 from .constants import Constants
 from .windowgui.ui import Button

@@ -14,24 +14,8 @@ class Colors:
 	GREY = (128, 128, 128)
 
 
-def root_pos(screen_size, rect, top_y=False, bottom_y=False,
-    left_x=False, right_x=False, center_x=False, center_y=False):
-    center_pos = int(screen_size[0]/2), int(screen_size[1]/2)
-    new_x, new_y = 0, 0
-    if center_x:
-        new_x = center_pos[0]-int(rect.width/2)
-    if center_y:
-        new_y = center_pos[1]-int(rect.height/2)
-    if left_x:
-        new_x = 0
-    if right_x:
-        new_x = screen_size[0]-rect.width
-    if bottom_y:
-        new_y = screen_size[1]-rect.height
-    if top_y:
-        new_y = 0
-    return rect.x+new_x, rect.y+new_y
-
+def draw_border(surface, rect, size):
+    pass
 
 
 def root_rect(screen_size, rect, top_y=False, bottom_y=False,
@@ -52,6 +36,8 @@ def root_rect(screen_size, rect, top_y=False, bottom_y=False,
         new_y = 0
     rect.x += new_x
     rect.y += new_y
+    return rect.x, rect.y
+
 
     
 
