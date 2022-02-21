@@ -70,7 +70,7 @@ class JoinUI(UIManager):
     def __init__(self, window):
         super().__init__(window)
         self.ui = [
-        TextBox("ip_box", 0, -100, 175, 50),
+        TextBox("ip_box", 0, -100, 190, 50),
         ]
         self.ip_text = Text(0, 0, "Enter Host IP Address")
 
@@ -85,7 +85,7 @@ class JoinUI(UIManager):
                 
                 ip = event.ui_element.text.string
                 id = f"Joiny {random.randrange(1, 100)}"
-                self.window.ui_manager = ChatUI(self.window, ChatConn("client", ChatConn.IP_PRIVATE, id))
+                self.window.ui_manager = ChatUI(self.window, ChatConn("client", ip, id))
                 
     
     def update(self):

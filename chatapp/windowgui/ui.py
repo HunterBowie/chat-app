@@ -183,6 +183,9 @@ class UIManager:
         self.window = window
         self.ui = []
     
+    def stop(self):
+        pass
+    
     def get_element(self, id):
         for element in self.ui:
             if element.id == id:
