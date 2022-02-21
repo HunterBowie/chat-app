@@ -1,22 +1,23 @@
 import pygame
-from .util import DEFAULT_FONT
+from .assets import Assets
 
 
 
 class Text:
-    FONT = DEFAULT_FONT
-    def __init__(self, x, y, string, font_file=None,
+    default_font_name = "regular"
+    def __init__(self, x, y, string, font_name=None,
     size=30, color=(0, 0, 0), alpha=0, antialias=True):
         self.x = x
         self.y = y
         self.string = string
-        self.font_file = font_file
         self.size = size
         self.color = color
         self.alpha = alpha
         self.antialias = antialias
-        if self.font_file == None:
-            self.font_file = self.FONT
+        self.font_name = font_name
+        if self.font_name is None:
+            self.font_name = self.default_font_name
+        self.font_file = Assets.FONTS[self.font_name]
         self.font = pygame.font.Font(self.font_file, self.size)
     
     def add(self, string):
@@ -53,8 +54,8 @@ class Text:
         self.center_x(rect)
         self.center_y(rect)
 
-def get_text_size(string, size=30, font_file=None):
-    if not font_file:
-        font_file = Text.FONT
-    t = Text(0, 0, string, font_file, size)
+def get_text_size(string, size=30, font_name=None):
+    if font_name is None:
+        font_name = Text.default_font_name
+    t = Text(0, 0, string, font_name, size)
     return t.get_width(), t.get_height()

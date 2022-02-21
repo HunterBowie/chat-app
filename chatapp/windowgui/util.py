@@ -39,45 +39,17 @@ def root_rect(screen_size, rect, top_y=False, bottom_y=False,
     return rect.x, rect.y
 
 
+
     
 
 
-CURRENT_DIR = path.dirname(__file__)
-IMAGES_DIR = path.join(CURRENT_DIR, "assets/images")
-SOUNDS_DIR = path.join(CURRENT_DIR, "assets/sounds")
-FOUNTS_DIR = path.join(CURRENT_DIR, "assets/fonts")
-
-DEFAULT_FONT = pygame.font.get_default_font()
-ROUNDED_FONT = path.join(FOUNTS_DIR, "rounded.ttf")
-
-def load_img(img_path, ext=".png", colorkey=Colors.BLACK):
-    full_path = path.join(IMAGES_DIR, img_path) + ext
-    img = pygame.image.load(full_path).convert()
-    img.set_colorkey(Colors.BLACK)
-    return img
 
 
 
 
-class Textures:
-    # colors: blue green white red yellow
 
-    # types
-    BUTTON_UP = 0
-    BUTTON_DOWN = 1
 
-    @staticmethod
-    def get(type, scale, color_name):
-        shape = "_square"
-        if scale[0] > scale[1] * 1.50:
-            shape = "_long"
-        img = None
-        if type == Textures.BUTTON_DOWN:
-            img = load_img(color_name + "_button_down" + shape)
-        elif type == Textures.BUTTON_UP:
-            img = load_img(color_name + "_button_up" + shape)
 
-        return pygame.transform.scale(img, scale)
 
 
 

@@ -1,5 +1,6 @@
 import pygame, pyperclip
-from .util import Textures, Colors
+from .util import Colors
+from .assets import Assets
 from .text import Text, get_text_size
 from .constants import Constants
 from .timers import RealTimer
@@ -7,9 +8,6 @@ from .timers import RealTimer
 class UIEvent:
     BUTTON_CLICK = pygame.USEREVENT 
     TEXTBOX_POST = pygame.USEREVENT + 1
-
-
-
 
 
 
@@ -36,8 +34,8 @@ class Button(UIElement):
             self.top_img_x = int(self.rect.width/2-self.top_img.get_width()/2)
             self.top_img_y = int(self.rect.height/2-self.top_img.get_height()/2)
             
-        self._img_up = Textures.get(Textures.BUTTON_UP, (width, height), color_name)
-        self._img_down = Textures.get(Textures.BUTTON_DOWN, (width, height-4), color_name)
+        self._img_up = Assets.get_button_img(False, (width, height), color_name)
+        self._img_down = Assets.get_button_img(True, (width, height-4), color_name)
     
     def eventloop(self, event):
         pos = pygame.mouse.get_pos()

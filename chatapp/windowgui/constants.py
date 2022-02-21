@@ -1,3 +1,5 @@
+from os import path
+import pygame
 
 class Constants:
 
@@ -9,3 +11,8 @@ class Constants:
     TEXTBOX_CURSOR_BLINK_TIME = .5
     TEXTBOX_BACKSPACE_SPEED = 9
     TEXTBOX_BORDER_WIDTH = 4
+
+
+    
+
+    
