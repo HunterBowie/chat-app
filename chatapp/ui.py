@@ -10,7 +10,7 @@ from .chatconn import ChatConn
 class ChatUI(UIManager):
     def __init__(self, window, chatconn):
         super().__init__(window)
-        self.chatbox = ChatBox(25, 10, Constants.SCREEN_WIDTH-50, 350)
+        self.chatbox = ChatBox(25, 10, Constants.SCREEN_WIDTH-50, 350, chatconn.id)
         self.chatconn = chatconn
 
         self.ui = [
