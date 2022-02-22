@@ -1,21 +1,15 @@
-import socket, requests
-# print(socket.gethostbyname(socket.getfqdn()))
-
-# print(requests.get("https://api.ipify.org").text)
-
-# s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-# s.settimeout(0)
-# s.connect(('10.255.255.255', 1))
-# IP = s.getsockname()[0]
-# print(IP)
-
-# string = "0987".encode()
-
-# print(len(string))
+from chatapp.windowgui.text import Text
+from chatapp.windowgui.window import Window
 
 
-# l = [1, 2, 3, 4, 5]
+class MyWindow(Window):
+    def __init__(self):
+        super().__init__((500, 500))
+        t = Text(0, 0, "Hello")
+    
+    def update(self):
+        super().update()
+        self.t.render(self.screen)
 
-# l.insert(0, 8)
 
-print(l)
+MyWindow().start()
