@@ -20,18 +20,17 @@ class Text:
 
     def __init__(self, x, y, string, format=default_format, newline_width=None):
         self.format = format
-        self.string = string
         self.x = x
         self.y = y
         self.newline_width = newline_width
         self.set(string)
 
     def set(self, string):
+        self.raw_string = string
         self.lines = string.split("\n")
         self.string = string.replace("\n", "")
         if self.newline_width:
             new_lines = []
-            
             for line in self.lines:
                 new_line = "" 
                 for char in line:
@@ -39,21 +38,24 @@ class Text:
                     if get_text_size(new_line, self.format)[0] >= self.newline_width:
                         new_lines.append(new_line.strip())
                         new_line = ""
-                    
                 if new_line:
                     new_lines.append(new_line.strip())
             self.lines = new_lines
                     
-
     
     def add(self, string):
-        self.set(self.string + string)
+        self.set(self.raw_string + string)
     
     def pop(self):
         char = self.string[len(self.string)-1]
-        self.string = self.string[:len(self.string)-1]
+        self.set(self.string[:len(self.string)-1])
         return char
     
+    def get_width(self):
+        return self.get_surf().get_width()
+    
+    def get_height(self):
+        return self.get_surf().get_height()
 
     def get_rect(self):
         return pygame.Rect(self.x, self.y, self.get_width(), self.get_height())
@@ -81,7 +83,6 @@ class Text:
             surf = font.render(self.string, self.format["antialias"], self.format["color"])
         
         return surf
-        
 
     
     def render(self, screen):
