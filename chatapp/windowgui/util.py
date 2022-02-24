@@ -42,6 +42,16 @@ def root_rect(screen_size, rect, top_y=False, bottom_y=False,
 
     
 
+def load_img(img_name, img_path, ext=".png", colorkey=Colors.BLACK, scale=None):
+    full_path = path.join(img_path, img_name) + ext
+    try:
+        img = pygame.image.load(full_path).convert()
+    except FileNotFoundError:
+        raise FileNotFoundError(f"no image for path {full_path}")
+    if scale is not None:
+        img = pygame.transform.scale(img, scale)
+    img.set_colorkey(Colors.BLACK)
+    return img
 
 
 

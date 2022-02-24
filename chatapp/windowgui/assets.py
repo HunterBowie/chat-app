@@ -1,20 +1,13 @@
 import pygame
 from os import path
-from .util import Colors
+from .util import Colors, load_img
 
-# public
-def load_img(img_name, img_path, ext=".png", colorkey=Colors.BLACK, scale=None):
-    full_path = path.join(img_path, img_name) + ext
-    try:
-        img = pygame.image.load(full_path).convert()
-    except FileNotFoundError:
-        raise FileNotFoundError(f"no image for path {full_path}")
-    if scale is not None:
-        img = pygame.transform.scale(img, scale)
-    img.set_colorkey(Colors.BLACK)
-    return img
+def get_asset(type, name):
+    if type == "fonts":
+        return Assets.FONTS[name]
+    if type == "sounds":
+        pass
 
-# private
 class Assets:
     CURRENT_DIR = path.dirname(__file__)
     IMAGES_DIR = path.join(CURRENT_DIR, "assets/images")

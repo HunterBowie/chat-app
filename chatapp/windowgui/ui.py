@@ -70,9 +70,14 @@ class Slider(UIElement):
     pass
 
 class TextBox(UIElement):
-    def __init__(self, id, x, y, width, height, font_size=25, border=True):
+    def __init__(self, id, x, y, width, height, format=None, border=True):
         super().__init__(id, x, y, width, height)
-        self.text = Text(0, 0, "", size=font_size)
+        if format is None:
+            self.text = Text(0, 0, "")
+        
+        else:
+            self.text = Text(0, 0, "", format)
+        
         
         self.border = border
         self.selected = False

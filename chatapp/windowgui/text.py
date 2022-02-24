@@ -1,78 +1,84 @@
+from http.cookies import SimpleCookie
+from lib2to3.pgen2.token import NEWLINE
 import pygame
 from .assets import Assets
+from .util import Colors
 
 
+def get_text_size(string, format):
+    font = pygame.font.Font(format["font_file"], format["size"])
+    surf = font.render(string, format["antialias"], format["color"])
+    return surf.get_width(), surf.get_height()
 
 class Text:
-    default_font_name = "regular"
-    def __init__(self, x, y, string, font_name=None,
-    size=30, color=(0, 0, 0), alpha=0, antialias=True, max_width=None):
+    default_format = {
+        "font_file": pygame.font.get_default_font(),
+        "size": 30,
+        "antialias": True,
+        "color": Colors.BLACK
+    }
+
+    def __init__(self, x, y, string, format=default_format, newline_width=None):
+        self.format = format
+        self.string = string
         self.x = x
         self.y = y
-        self.size = size
-        self.color = color
-        self.alpha = alpha
-        self.antialias = antialias
-        if font_name is None:
-            self.font_file = Assets.FONTS[self.default_font_name]
-        self.font_file = Assets.FONTS[self.font_name]
-        self.font = pygame.font.Font(self.font_file, self.size)
-        self.max_width = max_width
+        self.newline_width = newline_width
         self.set(string)
 
-
     def set(self, string):
-        self.string = string
-        self.lines = []
-        if self.max_width:
-            if Text(0, 0, self.string).get_width() > self.max_width:
-                current_string = self.string
-
-                while Text(0, 0, current_string).get_width() > self.max_width:
-                    pass
-        else:
-            self.lines = [self.string]
-
+        self.lines = string.split("\n")
+        self.string = string.replace("\n", "")
+        if self.newline_width:
+            new_lines = []
+            
+            for line in self.lines:
+                new_line = "" 
+                for char in line:
+                    new_line = new_line + char
+                    if get_text_size(new_line, self.format)[0] >= self.newline_width:
+                        new_lines.append(new_line.strip())
+                        new_line = ""
+                    
+                if new_line:
+                    new_lines.append(new_line.strip())
+            self.lines = new_lines
+                    
 
     
     def add(self, string):
-        self.string = self.string + string
+        self.set(self.string + string)
     
     def pop(self):
         char = self.string[len(self.string)-1]
         self.string = self.string[:len(self.string)-1]
         return char
     
-    def get_width(self):
-        return self.get_surf().get_width()
-    
-    def get_height(self):
-        return self.get_surf().get_height()
-    
+
     def get_rect(self):
         return pygame.Rect(self.x, self.y, self.get_width(), self.get_height())
     
     def get_surf(self):
-        self.font = pygame.font.Font(self.font_file, self.size)
+        font = pygame.font.Font(self.format["font_file"], self.format["size"])
 
-        if self.lines:
+        if len(self.lines) > 1:
             renders = []    
             for string in self.lines:
-                self.renders.append(self.font.render(string, self.antialias, self.color))
+                renders.append(font.render(string, self.format["antialias"], self.format["color"]))
             
             width = height = 0
             for line_surf in renders:
                 width += line_surf.get_width()
                 height += line_surf.get_height()
             
-            surf = pygame.Surface((width, height))
+            surf = pygame.Surface((width, height), pygame.SRCALPHA)
             x = y = 0
             for line_surf in renders:
                 surf.blit(line_surf, (x, y))
-                x += line_surf.get_width()
+                y += line_surf.get_height()
             
         else:
-            surf = self.font.render(self.string, self.antialias, self.color)
+            surf = font.render(self.string, self.format["antialias"], self.format["color"])
         
         return surf
         
@@ -91,8 +97,5 @@ class Text:
         self.center_x(rect)
         self.center_y(rect)
 
-def get_text_size(string, size=30, font_name=None):
-    if font_name is None:
-        font_name = Text.default_font_name
-    t = Text(0, 0, string, font_name, size)
-    return t.get_width(), t.get_height()
+
+

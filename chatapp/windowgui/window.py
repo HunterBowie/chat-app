@@ -14,7 +14,8 @@ class Window:
         self.running = True
         while self.running:
             self.update()
-        self.ui_manager.stop()
+        if self.ui_manager:
+            self.ui_manager.stop()
         pygame.quit()
 
 
