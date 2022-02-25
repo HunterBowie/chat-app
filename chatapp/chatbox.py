@@ -16,12 +16,18 @@ class ChatBox:
          
 
     def render(self, surface):
-    
+        bg = pygame.Surface(self.rect.size)
+        bg.fill(Colors.GREY)
+        bg.set_alpha(100)
+        surface.blit(bg, self.rect.topleft)
+        x, y = self.rect.x, self.rect.y
         for msg in self.messages:
             if msg["id"] == self.id:
-                pass
+                Text(x, y, msg["content"]).render(surface)
             
             else:
-                pass
+                Text(x, y, msg["content"]).render(surface)
+
+            y += Text(0, 0, "9").get_height()
 
             

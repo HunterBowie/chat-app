@@ -11,7 +11,7 @@ class RealTimer:
     def get(self):
         if self.start_stop_timer == -1:
             return 0
-        return int(time.monotonic()-self.start_stop_timer)
+        return time.monotonic()-self.start_stop_timer
     
     def reset(self):
         self.start_stop_timer = time.monotonic()

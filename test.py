@@ -8,7 +8,8 @@ class MyWindow(Window):
     def __init__(self):
         super().__init__((500, 500))
         self.bg_color = Colors.WHITE
-        self.t = Text(20, 50, "The best cure to cancer is eating five hundred mangos a day!", newline_width=200)
+        self.t = Text(20, 50, "The best cure to cancer is eating five hundred mangos a day!",
+        format={"color": (255, 0, 255)}, newline_width=200)
     
     def update(self):
         super().update()

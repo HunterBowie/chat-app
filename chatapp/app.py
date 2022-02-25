@@ -1,4 +1,3 @@
-from pathlib import Path
 import pygame
 from .windowgui.window import Window
 from .windowgui.util import Colors
@@ -11,6 +10,7 @@ from .assets import Assets
 class App(Window):
     def __init__(self):
         super().__init__(Constants.SCREEN_SIZE)
+        Assets.convert_imgs()
         pygame.display.set_caption("Chat App")
         pygame.display.set_icon(Assets.IMAGES["icon"])
         Text.default_format["font_file"] = Assets.FONTS["rounded"]

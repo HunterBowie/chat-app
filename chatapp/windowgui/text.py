@@ -20,6 +20,9 @@ class Text:
 
     def __init__(self, x, y, string, format=default_format, newline_width=None):
         self.format = format
+        for setting, value in self.default_format.items():
+            if setting not in format:
+                self.format[setting] = value
         self.x = x
         self.y = y
         self.newline_width = newline_width

@@ -34,7 +34,7 @@ class Window:
         if self.ui_manager:
             self.ui_manager.update()
 
-        pygame.display.update()
+        pygame.display.flip()
         self.screen.fill(self.bg_color)
         self.clock.tick(self.fps)
 

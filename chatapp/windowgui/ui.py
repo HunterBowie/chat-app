@@ -73,11 +73,10 @@ class TextBox(UIElement):
     def __init__(self, id, x, y, width, height, format=None, border=True):
         super().__init__(id, x, y, width, height)
         if format is None:
-            self.text = Text(0, 0, "")
+            self.text = Text(0, 0, "", {"size": 20})
         
         else:
             self.text = Text(0, 0, "", format)
-        
         
         self.border = border
         self.selected = False
@@ -88,7 +87,7 @@ class TextBox(UIElement):
 
 
     def is_appendable(self, string):
-        text_size = get_text_size(self.text.string + string, size=self.text.size)
+        text_size = get_text_size(self.text.string + string, self.text.format)
         if text_size[0] >= (self.rect.width-Constants.TEXTBOX_MARGIN*2):
             return False
         return True

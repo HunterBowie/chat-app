@@ -10,11 +10,11 @@ from .chatconn import ChatConn
 class ChatUI(UIManager):
     def __init__(self, window, chatconn):
         super().__init__(window)
-        self.chatbox = ChatBox(25, 10, Constants.SCREEN_WIDTH-50, 350, chatconn.id)
+        self.chatbox = ChatBox(25, 60, Constants.SCREEN_WIDTH-50, 310, chatconn.id)
         self.chatconn = chatconn
 
         self.ui = [
-            TextBox("send_box", 0, 100, 300, 50)
+            TextBox("send_box", 0, 150, 300, 50)
         ]
         
         root_rect(
@@ -24,6 +24,10 @@ class ChatUI(UIManager):
 
         self.info_text = Text(0, -35, "")
         self.ip_text = Text(0, 0, "")
+        self.id_text = Text(0, 10, chatconn.id)
+    
+        self.id_text.x, self.id_text.y = root_rect(Constants.SCREEN_SIZE, self.id_text.get_rect(),
+        top_y=True, center_x=True)
         
         if self.chatconn.type == "server":
             self.info_text.string = "Server"
@@ -51,13 +55,14 @@ class ChatUI(UIManager):
         self.chatbox.render(self.window.screen)
         self.info_text.render(self.window.screen)
         self.ip_text.render(self.window.screen)
+        self.id_text.render(self.window.screen)
 
     def eventloop(self, event):
         super().eventloop(event)
 
         if event.type == UIEvent.TEXTBOX_POST:
             data = event.ui_element.text.string
-            event.ui_element.text.string = ""
+            event.ui_element.text.set("")
             self.chatconn.out_queue.append(data)
             self.chatbox.new_msg({"id":self.chatconn.id, "content": data})
 

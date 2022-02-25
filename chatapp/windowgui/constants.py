@@ -8,7 +8,7 @@ class Constants:
         "9":"(","0":")","-":"_","=":"+","`":"~",
         "/": "?", ";": ":", "\\": "\|"}
     TEXTBOX_MARGIN = 5
-    TEXTBOX_CURSOR_BLINK_TIME = .5
+    TEXTBOX_CURSOR_BLINK_TIME = .45
     TEXTBOX_BACKSPACE_SPEED = 9
     TEXTBOX_BORDER_WIDTH = 4
 
