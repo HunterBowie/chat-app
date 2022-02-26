@@ -1,7 +1,7 @@
 import pygame
 from chatapp.windowgui.text import Text
 from chatapp.windowgui.window import Window
-from chatapp.windowgui.util import Colors
+from chatapp.windowgui.util import Colors, draw_border
 pygame.init()
 
 class MyWindow(Window):
@@ -14,6 +14,9 @@ class MyWindow(Window):
     def update(self):
         super().update()
         self.t.render(self.screen)
+        draw_border(self.screen, pygame.Rect(40, 40, 100, 100), 1)
+
+
 
 
 MyWindow().start()

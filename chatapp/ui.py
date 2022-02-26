@@ -1,11 +1,12 @@
 import pygame, random
 from .windowgui.ui import Button, TextBox
-from .windowgui.util import root_rect
+from .windowgui.util import root_rect, Flash, Colors
 from .windowgui.text import Text
 from .constants import Constants
 from .windowgui.ui import UIManager, UIEvent
 from .chatbox import ChatBox
 from .chatconn import ChatConn
+from .util import is_id_valid, IDCollisionError
 
 class ChatUI(UIManager):
     def __init__(self, window, chatconn):
@@ -89,7 +90,20 @@ class JoinUI(UIManager):
             if event.ui_id == "ip_box": 
                 
                 ip = event.ui_element.text.string
-                self.window.ui_manager = ChatUI(self.window, ChatConn("client", ip, self.id))
+                try:
+                    chatconn = ChatConn("client", ip, self.id)
+                    
+                except IDCollisionError:
+                    flash = Flash(0, 0, Text(0, 0, "Username collision", {"size": 20}),
+                     (240, 50), Colors.LIGHT_RED)
+                    flash.x, flash.y = root_rect(Constants.SCREEN_SIZE, flash.surface.get_rect(),
+                    center_x=True, top_y=True)
+                    self.window.flash(flash)
+                
+                else:
+                    self.window.ui_manager = ChatUI(self.window, chatconn)
+
+                
                 
     
     def update(self):
@@ -139,7 +153,15 @@ class StartUI(UIManager):
         if event.type == UIEvent.TEXTBOX_POST:
             if event.ui_id == "id_box":
                 id = event.ui_element.text.string
-                self.window.ui_manager = ConnectUI(self.window, id)
+                if is_id_valid(id):
+                    self.window.ui_manager = ConnectUI(self.window, id)
+                else:
+                    flash = Flash(0, 0, Text(0, 0, "Invalid username", {"size": 20}),
+                     (240, 50), Colors.LIGHT_YELLOW)
+                    flash.x, flash.y = root_rect(Constants.SCREEN_SIZE, flash.surface.get_rect(),
+                    center_x=True, top_y=True)
+                    self.window.flash(flash)
+                
     
     def update(self):
         super().update()

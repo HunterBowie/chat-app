@@ -1,5 +1,6 @@
 import socket, threading, requests   
 from .windowgui.timers import RealTimer 
+from .util import IDCollisionError
 
 def _get_private_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -22,9 +23,7 @@ class ChatConn:
         INIT = 0
         BREAK = 1
         CHAT = 2
-        EMPTY = 3
-    
-   
+        EMPTY = 3   
 
     def __init__(self, type, ip, id):
         self.id = id
@@ -43,8 +42,13 @@ class ChatConn:
 
         elif self.type == "client":
             self.socket.connect(self.addr)
-            print("[CLIENT] connected to server")
-            threading.Thread(target=self._server_handler).start()
+            msg_type, conn_id = self._recv(self.socket)
+            if conn_id == self.id:
+                self._send(self.socket, "", self.MsgType.BREAK)
+                raise IDCollisionError("ChatConn attempted to join a ChatConn with same id")
+            self._send(self.socket, self.id, self.MsgType.INIT)
+            print(f"[CLIENT] connected to server: {conn_id}")
+            threading.Thread(target=self._server_handler, args=[conn_id]).start()
     
     def _send(self, conn, data, msg_type):
         data = data.encode()
@@ -70,11 +74,12 @@ class ChatConn:
         
 
     def _client_handler(self, conn):
-        msg_type, conn_id = self._recv(conn)
         self._send(conn, self.id, self.MsgType.INIT)
-
-        timer = RealTimer()
-        timer.start()
+  
+        msg_type, data = self._recv(conn)
+        if msg_type == self.MsgType.BREAK:
+            return None
+        conn_id = data
 
         print(f"[SERVER] new client {conn_id}")
 
@@ -97,11 +102,7 @@ class ChatConn:
     
 
     
-    def _server_handler(self):
-        self._send(self.socket, self.id, self.MsgType.INIT)
-  
-        msg_type, data = self._recv(self.socket)
-        conn_id = data
+    def _server_handler(self, conn_id):
 
         while self.running:
             if self.out_queue:

@@ -12,6 +12,10 @@ class Constants:
     TEXTBOX_BACKSPACE_SPEED = 9
     TEXTBOX_BORDER_WIDTH = 4
 
+    FLASH_FADE_TIME = .5
+    FLASH_FADE_SPEED = 10
+
+
 
     
 

@@ -8,8 +8,8 @@ class Assets:
     IMAGES_DIR = path.join(CURRENT_DIR, "assets/images")
     
     IMAGES = {
-            "icon": load_img("icon", IMAGES_DIR, scale=(32, 32)),
-            "icon_large": load_img("icon", IMAGES_DIR, scale=(32, 32))
+            "icon_small": load_img("icon", IMAGES_DIR, scale=(32, 32)),
+            "icon_large": load_img("icon", IMAGES_DIR)
         }
     FONTS = {
         "rounded": get_asset("fonts", "rounded")

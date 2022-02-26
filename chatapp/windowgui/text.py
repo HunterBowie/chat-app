@@ -2,8 +2,12 @@ from http.cookies import SimpleCookie
 from lib2to3.pgen2.token import NEWLINE
 import pygame
 from .assets import Assets
-from .util import Colors
+from .util import Colors, get_surf
 
+
+def render_text_background(surface, text, color, alpha, margin):
+    surf = get_surf((text.get_width()+margin, text.get_height()+margin), color, alpha)
+    surface.blit(surf, (int(text.x-margin/2), int(text.y-margin/2)))
 
 def get_text_size(string, format):
     font = pygame.font.Font(format["font_file"], format["size"])
@@ -59,6 +63,9 @@ class Text:
     
     def get_height(self):
         return self.get_surf().get_height()
+    
+    def get_size(self):
+        return self.get_width(), self.get_height()
 
     def get_rect(self):
         return pygame.Rect(self.x, self.y, self.get_width(), self.get_height())
@@ -71,10 +78,12 @@ class Text:
             for string in self.lines:
                 renders.append(font.render(string, self.format["antialias"], self.format["color"]))
             
-            width = height = 0
+            height = 0
+            width = 0
             for line_surf in renders:
-                width += line_surf.get_width()
                 height += line_surf.get_height()
+                if line_surf.get_width() > width:
+                    width = line_surf.get_width()
             
             surf = pygame.Surface((width, height), pygame.SRCALPHA)
             x = y = 0

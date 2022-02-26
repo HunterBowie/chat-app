@@ -1,6 +1,7 @@
+from email import message
 import pygame
-from .windowgui.text import Text, get_text_size
-from .windowgui.util import Colors
+from .windowgui.text import Text, get_text_size, render_text_background
+from .windowgui.util import Colors, get_surf, render_border
 
 class ChatBox:
     def __init__(self, x, y, width, height, id):
@@ -17,20 +18,29 @@ class ChatBox:
 
     def render(self, surface):
         chatsurf = pygame.Surface(self.rect.size, pygame.SRCALPHA)
-        bg = chatsurf.copy()
-        bg.fill(Colors.GREY)
-        bg.set_alpha(100)
-        chatsurf.blit(bg, (0, 0))
+        chatsurf.blit(get_surf(self.rect.size, Colors.GREY, 100), (0, 0))
 
-        y = self.rect.height-50
-        for msg in self.messages:
-            if msg["id"] == self.id:
-                Text(100, y, msg["content"], newline_width=200).render(chatsurf)
-            
-            else:
-                Text(0, y, msg["content"], newline_width=200).render(chatsurf)
-
-            y -= Text(0, 0, "9").get_height()
+        render_border(surface, self.rect, 3)
+        
+        if self.messages:
+            text_width = 150
+            margin = 10
+            y = self.rect.height
+            x = 0
+            color = None
+            for msg in self.messages:
+                text = Text(0, 0, msg["content"], {"size": 20}, newline_width=text_width)
+                y -= text.get_height()+margin*2
+                if msg["id"] == self.id:
+                    x = self.rect.width-text.get_width()-margin
+                    color = Colors.GREEN
+                else:
+                    x = margin
+                    color = Colors.RED
+                text.x, text.y = x, y
+                render_text_background(chatsurf, text, color, 75, 10)
+                text.render(chatsurf)
+                
         surface.blit(chatsurf, self.rect.topleft)
 
             

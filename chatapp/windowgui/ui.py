@@ -1,5 +1,5 @@
 import pygame, pyperclip
-from .util import Colors
+from .util import Colors, render_border
 from .assets import Assets
 from .text import Text, get_text_size
 from .constants import Constants
@@ -150,10 +150,7 @@ class TextBox(UIElement):
                 
         
     def render(self, surface):
-        width = Constants.TEXTBOX_BORDER_WIDTH
-        white_rect = pygame.Rect(int(self.rect.x+width/2), int(self.rect.y+width/2), self.rect.width-width, self.rect.height-width)
-        pygame.draw.rect(surface, Colors.BLACK, self.rect)
-        pygame.draw.rect(surface, Colors.WHITE, white_rect)
+        render_border(surface, self.rect, 3)
         surf = pygame.Surface((self.rect.width, self.rect.height), pygame.SRCALPHA)
         self.text.render(surf)
         surface.blit(surf, (self.rect.x + Constants.TEXTBOX_MARGIN, self.rect.y))
