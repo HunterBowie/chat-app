@@ -5,7 +5,7 @@ class Window:
     def __init__(self, screen_size):
         self.screen = pygame.display.set_mode(screen_size)
         self.clock = pygame.time.Clock()
-        self.fps = 60
+        self.max_fps = 60
         self.ui_manager = None
         self.running = False
         self.bg_color = Colors.RED
@@ -50,5 +50,5 @@ class Window:
 
         pygame.display.flip()
         self.screen.fill(self.bg_color)
-        self.clock.tick(self.fps)
+        self.clock.tick(self.max_fps)
 

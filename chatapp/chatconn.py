@@ -1,6 +1,6 @@
 import socket, threading, requests   
 from .windowgui.timers import RealTimer 
-from .util import IDCollisionError
+from .util import ConnIDTaken, ConnInvalidIP, ConnPortTaken, ConnRefused
 
 def _get_private_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -33,19 +33,31 @@ class ChatConn:
         self.running = True
         self.out_queue = []
         self.in_queue = []
+        
 
         if self.type == "server":
-            self.socket.bind(self.addr)
+            try:
+                self.socket.bind(self.addr)
+            except OSError:
+                raise ConnPortTaken("cannot host two servers on the same computer")
             print("[SERVER] bound to address")
             threading.Thread(target=self._run_server).start()
 
 
         elif self.type == "client":
-            self.socket.connect(self.addr)
+            try:
+                self.socket.connect(self.addr)
+            except ConnectionRefusedError:
+                raise ConnRefused(f"client unable to find server at IP \"{self.addr[0]}\"")
+            except socket.gaierror:
+                raise ConnInvalidIP(f"\"{self.addr[0]}\" is not a valid IP")
+            except OSError:
+                raise ConnInvalidIP(f"\"{self.addr[0]}\" is not a valid IP")
+            
             msg_type, conn_id = self._recv(self.socket)
             if conn_id == self.id:
                 self._send(self.socket, "", self.MsgType.BREAK)
-                raise IDCollisionError("ChatConn attempted to join a ChatConn with same id")
+                raise ConnIDTaken("ChatConn attempted to join a ChatConn with same id")
             self._send(self.socket, self.id, self.MsgType.INIT)
             print(f"[CLIENT] connected to server: {conn_id}")
             threading.Thread(target=self._server_handler, args=[conn_id]).start()
@@ -59,7 +71,11 @@ class ChatConn:
         conn.send(data)
 
     def _recv(self, conn):
-        meta = conn.recv(self.HEADER).decode()
+        try:
+            meta = conn.recv(self.HEADER).decode()
+        except ConnectionResetError:
+            self.running = False
+            raise ConnectionResetError("shit me connection rest")
         meta = meta.split(",")
         data_len, msg_type = int(meta[0]), int(meta[1])
         data = conn.recv(data_len).decode()

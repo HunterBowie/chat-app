@@ -6,16 +6,14 @@ from .windowgui.util import Colors, get_surf, render_border
 class ChatBox:
     def __init__(self, x, y, width, height, id):
         self.rect = pygame.Rect(x, y, width, height)
-        self.messages = [] 
+        self.messages = []
         self.id = id
+        self.scroll = 0
     
     def new_msg(self, msg):
+        self.scroll = 0
         self.messages.insert(0, msg)
     
-    def _render_msg(self, msg, x, y, color):
-        string = msg["content"]
-         
-
     def render(self, surface):
         chatsurf = pygame.Surface(self.rect.size, pygame.SRCALPHA)
         chatsurf.blit(get_surf(self.rect.size, Colors.GREY, 100), (0, 0))
@@ -25,12 +23,17 @@ class ChatBox:
         if self.messages:
             text_width = 150
             margin = 10
-            y = self.rect.height
+            y = self.rect.height + self.scroll
             x = 0
             color = None
             for msg in self.messages:
                 text = Text(0, 0, msg["content"], {"size": 20}, newline_width=text_width)
                 y -= text.get_height()+margin*2
+                if y> self.rect.height:
+                    continue
+                if y + text.get_height()+margin*2 < 0:
+                    break
+                
                 if msg["id"] == self.id:
                     x = self.rect.width-text.get_width()-margin
                     color = Colors.GREEN

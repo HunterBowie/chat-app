@@ -1,7 +1,8 @@
-import pygame, os
+import pygame, os, time
 from .windowgui.window import Window
 from .windowgui.util import Colors
 from .windowgui.text import Text
+from .windowgui.timers import RealTimer
 from .constants import Constants
 from .ui import StartUI
 from .assets import Assets
@@ -20,5 +21,12 @@ class App(Window):
         self.bg_color = Colors.WHITE
 
         self.ui_manager = StartUI(self)
+
+        self.monitor = RealTimer()
+
+    def update(self):
+        self.monitor.reset()
+        super().update()
+        print(f"cycle delay {time.monotonic()-self.monitor.start_stop_timer}")
 
     

@@ -1,8 +1,16 @@
 
 
-class IDCollisionError(Exception):
+class ConnIDTaken(Exception):
+    pass
+
+class ConnPortTaken(Exception):
+    pass
+
+class ConnRefused(Exception):
+    pass
+
+class ConnInvalidIP(Exception):
     pass
 
 
-def is_id_valid(id):
-    return True
+

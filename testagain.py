@@ -1,13 +1,15 @@
 import time
 from chatapp.windowgui.timers import RealTimer
 
+timer = time.monotonic()
 
-t = RealTimer()
-print("now")
-print(time.monotonic())
-t.start()
-while not t.passed(.1):
-    pass
-print(time.monotonic())
+def holy():
+    timer = int(time.monotonic()*1000)
+    x = "garbat"
+    x = x + "88888888883i38r3rsaesr"
+    for i in range(4):
+        pass
+    return int(time.monotonic()*1000)-timer
 
-print("gochat")
+while True:
+    print(holy())

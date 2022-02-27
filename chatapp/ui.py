@@ -6,7 +6,7 @@ from .constants import Constants
 from .windowgui.ui import UIManager, UIEvent
 from .chatbox import ChatBox
 from .chatconn import ChatConn
-from .util import is_id_valid, IDCollisionError
+from .util import ConnIDTaken, ConnInvalidIP, ConnRefused
 
 class ChatUI(UIManager):
     def __init__(self, window, chatconn):
@@ -60,6 +60,8 @@ class ChatUI(UIManager):
 
     def eventloop(self, event):
         super().eventloop(event)
+        if event.type == pygame.MOUSEWHEEL:
+            self.chatbox.scroll += event.y*2
 
         if event.type == UIEvent.TEXTBOX_POST:
             data = event.ui_element.text.string
@@ -76,9 +78,9 @@ class JoinUI(UIManager):
     def __init__(self, window, id):
         super().__init__(window)
         self.ui = [
-        TextBox("ip_box", 0, -100, 190, 50),
+        TextBox("ip_box", 0, 0, 190, 50),
         ]
-        self.ip_text = Text(0, 0, "Enter Server IP Address")
+        self.ip_text = Text(0, -100, "Enter Server IP Address")
         self.id = id
         root_rect(Constants.SCREEN_SIZE, self.get_element("ip_box").rect, center_x=True, center_y=True)
         self.ip_text.x, self.ip_text.y = root_rect(Constants.SCREEN_SIZE, self.ip_text.get_rect(), center_x=True, center_y=True)
@@ -86,16 +88,30 @@ class JoinUI(UIManager):
     def eventloop(self, event):
         super().eventloop(event)
 
+      
         if event.type == UIEvent.TEXTBOX_POST:
             if event.ui_id == "ip_box": 
-                
                 ip = event.ui_element.text.string
                 try:
                     chatconn = ChatConn("client", ip, self.id)
                     
-                except IDCollisionError:
-                    flash = Flash(0, 0, Text(0, 0, "Username collision", {"size": 20}),
-                     (240, 50), Colors.LIGHT_RED)
+                except ConnIDTaken:
+                    flash = Flash(0, 0, Text(0, 0, "username taken", {"size": 20}),
+                     (240, 50), Colors.LIGHT_YELLOW)
+                    flash.x, flash.y = root_rect(Constants.SCREEN_SIZE, flash.surface.get_rect(),
+                    center_x=True, top_y=True)
+                    self.window.flash(flash)
+                
+                except ConnInvalidIP:
+                    flash = Flash(0, 0, Text(0, 0, "invalid IP address", {"size": 20}),
+                     (240, 50), Colors.LIGHT_YELLOW)
+                    flash.x, flash.y = root_rect(Constants.SCREEN_SIZE, flash.surface.get_rect(),
+                    center_x=True, top_y=True)
+                    self.window.flash(flash)
+                
+                except ConnRefused:
+                    flash = Flash(0, 0, Text(0, 0, "failed to join server", {"size": 20}),
+                     (240, 50), Colors.LIGHT_YELLOW)
                     flash.x, flash.y = root_rect(Constants.SCREEN_SIZE, flash.surface.get_rect(),
                     center_x=True, top_y=True)
                     self.window.flash(flash)
@@ -153,14 +169,8 @@ class StartUI(UIManager):
         if event.type == UIEvent.TEXTBOX_POST:
             if event.ui_id == "id_box":
                 id = event.ui_element.text.string
-                if is_id_valid(id):
-                    self.window.ui_manager = ConnectUI(self.window, id)
-                else:
-                    flash = Flash(0, 0, Text(0, 0, "Invalid username", {"size": 20}),
-                     (240, 50), Colors.LIGHT_YELLOW)
-                    flash.x, flash.y = root_rect(Constants.SCREEN_SIZE, flash.surface.get_rect(),
-                    center_x=True, top_y=True)
-                    self.window.flash(flash)
+                self.window.ui_manager = ConnectUI(self.window, id)
+                
                 
     
     def update(self):

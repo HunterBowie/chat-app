@@ -68,9 +68,6 @@ def load_img(img_name, img_path, ext=".png", colorkey=Colors.BLACK, convert=Fals
     return img
 
 
-
-
-
 class Flash:
     def __init__(self, x, y, text, size, color, duration=3):
         self.x = x
