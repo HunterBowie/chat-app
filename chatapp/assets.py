@@ -1,7 +1,8 @@
 import pygame
 from os import path
-from .windowgui.util import load_img
-from .windowgui.assets import get_asset
+from .windowgui.util import load_img, Colors
+from .windowgui.assets import get_asset, get_dir
+
 
 class Assets:
     CURRENT_DIR = path.dirname(__file__)
@@ -9,7 +10,10 @@ class Assets:
     
     IMAGES = {
             "icon_small": load_img("icon", IMAGES_DIR, scale=(32, 32)),
-            "icon_large": load_img("icon", IMAGES_DIR)
+            "icon_large": load_img("icon", IMAGES_DIR),
+            "arrow_up": load_img("arrowUp", get_dir("images")),
+            "arrow_left": load_img("arrowLeft", get_dir("images")),
+
         }
     FONTS = {
         "rounded": get_asset("fonts", "rounded")
@@ -18,7 +22,7 @@ class Assets:
 
     @classmethod
     def convert_imgs(cls):
-        cls.IMAGES = {name: img.convert() for name,img in cls.IMAGES.items()}
+        cls.IMAGES = {name: img.convert_alpha() for name,img in cls.IMAGES.items()}
 
 
         

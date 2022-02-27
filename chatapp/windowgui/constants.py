@@ -9,7 +9,7 @@ class Constants:
         "/": "?", ";": ":", "\\": "\|"}
     TEXTBOX_MARGIN = 5
     TEXTBOX_CURSOR_BLINK_TIME = .45
-    TEXTBOX_BACKSPACE_SPEED = 9
+    TEXTBOX_BACKSPACE_DELAY = .1
     TEXTBOX_BORDER_WIDTH = 4
 
     FLASH_FADE_TIME = .5

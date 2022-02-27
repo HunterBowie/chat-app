@@ -27,12 +27,14 @@ class ChatBox:
             x = 0
             color = None
             for msg in self.messages:
+                if y < 0:
+                    break
+                
                 text = Text(0, 0, msg["content"], {"size": 20}, newline_width=text_width)
                 y -= text.get_height()+margin*2
-                if y> self.rect.height:
-                    continue
-                if y + text.get_height()+margin*2 < 0:
-                    break
+                
+                if y > self.rect.height:
+                    continue   
                 
                 if msg["id"] == self.id:
                     x = self.rect.width-text.get_width()-margin

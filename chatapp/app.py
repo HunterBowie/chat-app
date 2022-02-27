@@ -27,6 +27,6 @@ class App(Window):
     def update(self):
         self.monitor.reset()
         super().update()
-        print(f"cycle delay {time.monotonic()-self.monitor.start_stop_timer}")
+        # print(f"cycle delay {time.monotonic()-self.monitor.start_time}")
 
     

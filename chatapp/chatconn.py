@@ -31,6 +31,7 @@ class ChatConn:
         self.addr = (ip, self.PORT)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.running = True
+        self.connected = False
         self.out_queue = []
         self.in_queue = []
         
@@ -86,6 +87,8 @@ class ChatConn:
         while self.running:
             conn, _ = self.socket.accept()
             threading.Thread(target=self._client_handler, args=[conn]).start()
+            if threading.active_count() > 1:
+                self.connected = True
         self.socket.close()
         
 
@@ -115,11 +118,12 @@ class ChatConn:
                 print("[SERVER] sent msg")
             else:
                 self._send(conn, "", self.MsgType.EMPTY)
+        
     
 
     
     def _server_handler(self, conn_id):
-
+        self.connected = True
         while self.running:
             if self.out_queue:
                 self._send(self.socket, self.out_queue.pop(0), self.MsgType.CHAT)
@@ -138,5 +142,6 @@ class ChatConn:
             self._send(self.socket, "", self.MsgType.BREAK)
             
         self.socket.close()
+        self.connected = False
 
 

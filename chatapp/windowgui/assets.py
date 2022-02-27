@@ -3,10 +3,17 @@ from os import path
 from .util import Colors, load_img
 
 def get_asset(type, name):
+    if type == "images":
+        print(load_img(name, Assets.IMAGES_DIR, colorkey=None))
+        return load_img(name, Assets.IMAGES_DIR, colorkey=None)
     if type == "fonts":
         return Assets.FONTS[name]
     if type == "sounds":
         pass
+def get_dir(name):
+    if name == "images":
+        return Assets.IMAGES_DIR
+    
 
 class Assets:
     CURRENT_DIR = path.dirname(__file__)
@@ -18,6 +25,7 @@ class Assets:
         "regular": pygame.font.get_default_font(),
         "rounded": path.join(FOUNTS_DIR, "rounded.ttf")
     }
+
 
 
     @classmethod

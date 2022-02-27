@@ -25,10 +25,11 @@ class UIElement:
                 
 
 class Button(UIElement):
-    def __init__(self, id, x, y, width, height, color_name="white", top_img=None):
+    def __init__(self, id, x, y, width, height, color_name="white", top_img=None, hide_button=False):
         super().__init__(id, x, y, width, height)
         self.clicked = False
         self.top_img = top_img
+        self.hide_button = hide_button
         self.top_img_x = self.top_img_y = 0
         if self.top_img:
             self.top_img_x = int(self.rect.width/2-self.top_img.get_width()/2)
@@ -53,11 +54,11 @@ class Button(UIElement):
         
 
     def render(self, surface):
-        
-        if self.clicked:
-            surface.blit(self._img_down, self.rect.topleft)
-        else:   
-            surface.blit(self._img_up, (self.rect.left, self.rect.top-4))
+        if not self.hide_button:
+            if self.clicked:
+                surface.blit(self._img_down, self.rect.topleft)
+            else:   
+                surface.blit(self._img_up, (self.rect.left, self.rect.top-4))
         
         if self.top_img:
             if self.clicked:
@@ -83,7 +84,8 @@ class TextBox(UIElement):
         self.cursor_blink = True
         self.cursor_timer = RealTimer()
         self.cursor_timer.start()
-        self.backspace_count = 0
+        self.backspace_timer = RealTimer()
+        self.held_backspace_timer = RealTimer()
 
 
     def is_appendable(self, string):
@@ -110,6 +112,8 @@ class TextBox(UIElement):
                     if self.is_appendable(" "):
                         self.text.add(" ")
                 elif key_name == "backspace":
+                    self.backspace_timer.reset()
+                    self.held_backspace_timer.reset()
                     if self.text.string:
                         self.text.pop()
                 elif key_name == "return":
@@ -135,18 +139,19 @@ class TextBox(UIElement):
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_BACKSPACE:
-                    self.backspace_count = 0
+                    self.backspace_timer.reset()
+                    self.backspace_timer.stop()
     
     def update(self):
         self.text.center_y(pygame.Rect(0, 0, self.rect.width, self.rect.height))
         keys = pygame.key.get_pressed()
         if self.selected:
             if keys[pygame.K_BACKSPACE]:
-                self.backspace_count += 1
-                if self.backspace_count == Constants.TEXTBOX_BACKSPACE_SPEED:
-                    self.backspace_count = 0
-                    if self.text.string:
-                        self.text.pop()
+                if self.backspace_timer.passed(Constants.TEXTBOX_BACKSPACE_DELAY*2):
+                    if self.held_backspace_timer.passed(Constants.TEXTBOX_BACKSPACE_DELAY):
+                        self.held_backspace_timer.reset()
+                        if self.text.string:
+                            self.text.pop()
                 
         
     def render(self, surface):
