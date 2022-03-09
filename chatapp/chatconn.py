@@ -1,15 +1,21 @@
-import socket, threading, requests   
+import socket, threading, requests
+
+from chatapp.constants import Constants   
 from .windowgui.timers import RealTimer 
 from .util import ConnIDTaken, ConnInvalidIP, ConnPortTaken, ConnRefused
 
 def _get_private_ip():
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.settimeout(0)
-    s.connect(('10.255.255.255', 1))
-    return s.getsockname()[0]
+    if Constants.HAS_INTERNET:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.settimeout(0)
+        s.connect(('10.255.255.255', 1))
+        return s.getsockname()[0]
+    return ""
 
 def _get_public_ip():
-    return requests.get("https://api.ipify.org").text
+    if Constants.HAS_INTERNET:
+        return requests.get("https://api.ipify.org").text
+    return ""
 
 class ChatConn:
     PORT = 5007
@@ -85,7 +91,6 @@ class ChatConn:
     def _run_server(self):
         self.socket.listen()
         while self.running:
-            conn, _ = self.socket.accept()
             threading.Thread(target=self._client_handler, args=[conn]).start()
             if threading.active_count() > 1:
                 self.connected = True

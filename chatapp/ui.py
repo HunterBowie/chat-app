@@ -43,10 +43,16 @@ class ChatUI(UIManager):
         
         if self.chatconn.type == "server":
             self.info_text.set("Server")
-            self.ip_text.set(ChatConn.IP_PRIVATE)
+            if Constants.HAS_INTERNET:
+                self.ip_text.set(ChatConn.IP_PRIVATE)
+            else:
+                self.ip_text.set("NONE")
         else:
             self.info_text.set("Client")
-            self.ip_text.set(self.chatconn.addr[0])
+            if Constants.HAS_INTERNET:
+                self.ip_text.set(self.chatconn.addr[0])
+            else:
+                self.ip_text.set("NONE")
         
         
         self.info_text.x, self.info_text.y = root_rect(
