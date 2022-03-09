@@ -1,4 +1,4 @@
-import pygame, random
+import pygame, random, threading
 from .windowgui.ui import Button, TextBox
 from .windowgui.util import root_rect, Flash, Colors
 from .windowgui.text import Text
@@ -96,7 +96,9 @@ class ChatUI(UIManager):
 
         if event.type == UIEvent.BUTTON_CLICK:
             if event.ui_id == "back_btn":
-                self.stop()
+                self.chatconn.running = False
+                while threading.get_active() > 1:
+                    print("waiting")
                 self.window.ui_manager = ConnectUI(self.window, self.chatconn.id)
 
         if event.type == UIEvent.TEXTBOX_POST:
