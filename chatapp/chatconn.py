@@ -25,6 +25,8 @@ class ChatConn:
 
     HEADER = 16
 
+    LISTENING_TIMEOUT = 0.2
+
     class MsgType:
         INIT = 0
         BREAK = 1
@@ -45,6 +47,7 @@ class ChatConn:
         if self.type == "server":
             try:
                 self.socket.bind(self.addr)
+                self.socket.settimeout(self.LISTENING_TIMEOUT)
             except OSError:
                 raise ConnPortTaken("cannot host two servers on the same computer")
             print("[SERVER] bound to address")
@@ -91,9 +94,14 @@ class ChatConn:
     def _run_server(self):
         self.socket.listen()
         while self.running:
-            threading.Thread(target=self._client_handler, args=[conn]).start()
-            if threading.active_count() > 1:
-                self.connected = True
+            try:
+                conn, addr = socket.accept()
+            except socket.timeout:
+                pass
+            else:
+                threading.Thread(target=self._client_handler, args=[conn]).start()
+                if threading.active_count() > 1:
+                    self.connected = True
         self.socket.close()
         
 
