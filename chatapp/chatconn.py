@@ -42,7 +42,6 @@ class ChatConn:
         self.connected = False
         self.out_queue = []
         self.in_queue = []
-        
 
         if self.type == "server":
             try:
@@ -95,29 +94,38 @@ class ChatConn:
         self.socket.listen()
         while self.running:
             try:
-                conn, addr = socket.accept()
+                conn, addr = self.socket.accept()
             except socket.timeout:
                 pass
             else:
                 threading.Thread(target=self._client_handler, args=[conn]).start()
-                if threading.active_count() > 1:
-                    self.connected = True
+            if threading.active_count() > 2:
+                self.connected = True
+            else:
+                self.connected = False
+        self.connected = False
         self.socket.close()
         
 
     def _client_handler(self, conn):
         self._send(conn, self.id, self.MsgType.INIT)
-  
+
         msg_type, data = self._recv(conn)
         if msg_type == self.MsgType.BREAK:
             return None
         conn_id = data
 
+        conn.settimeout(self.LISTENING_TIMEOUT)
+
         print(f"[SERVER] new client {conn_id}")
 
-        while self.running:
-        
-            msg_type, data = self._recv(conn)
+        while True:
+            try:
+                msg_type, data = self._recv(conn)
+            except socket.timeout:
+                continue
+
+
             if msg_type == self.MsgType.CHAT:
                 print("[SERVER] recived msg")
                 self.in_queue.append({"id": conn_id, "content": data})
@@ -125,6 +133,9 @@ class ChatConn:
                 print("[SERVER] client disconnect")
                 return None
             
+            if not self.running:
+                self._send(conn, "", self.MsgType.BREAK)
+                break
             
             if self.out_queue:
                 self._send(conn, self.out_queue.pop(0), self.MsgType.CHAT)
@@ -148,7 +159,7 @@ class ChatConn:
             if msg_type == self.MsgType.CHAT:
                 print("[CLIENT] recieved msg")
                 self.in_queue.append({"id": conn_id, "content": data})
-            if msg_type == self.MsgType.BREAK:
+            elif msg_type == self.MsgType.BREAK:
                 print("[CLIENT] server disconnected")
                 break
         else:

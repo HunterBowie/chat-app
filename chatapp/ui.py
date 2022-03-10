@@ -75,6 +75,8 @@ class ChatUI(UIManager):
             if self.chatconn.connected:
                 self.conn_text.format["color"] = Colors.GREEN
                 self.conn_text.set("Connected")
+                # Client: Connected Disconnected
+                # Server: No Clients, # Clients 
             else:
                 self.conn_text.format["color"] = Colors.RED
                 self.conn_text.set("Not Connected")
@@ -97,7 +99,7 @@ class ChatUI(UIManager):
         if event.type == UIEvent.BUTTON_CLICK:
             if event.ui_id == "back_btn":
                 self.chatconn.running = False
-                while threading.get_active() > 1:
+                while threading.active_count() > 1:
                     print("waiting")
                 self.window.ui_manager = ConnectUI(self.window, self.chatconn.id)
 
