@@ -70,16 +70,28 @@ class ChatUI(UIManager):
             msg = self.chatconn.in_queue.pop(0)
             self.chatbox.new_msg(msg)
         
-        if self.chatconn.connected != self.conn_text_value:
-            self.conn_text_value = self.chatconn.connected
-            if self.chatconn.connected:
+        connected = False
+        if self.chatconn.connections:
+            connected = True
+        
+        if connected != self.conn_text_value:
+            # Client: Connected Disconnected
+            # Server: No Clients, # Clients 
+            self.conn_text_value = connected
+            if connected:
                 self.conn_text.format["color"] = Colors.GREEN
-                self.conn_text.set("Connected")
-                # Client: Connected Disconnected
-                # Server: No Clients, # Clients 
+                if self.chatconn.type == "server":
+                    self.conn_text.set(f"{len(self.chatconn.connections)} Clients")
+                else:
+                    self.conn_text.set("Connected")
+                
             else:
                 self.conn_text.format["color"] = Colors.RED
-                self.conn_text.set("Not Connected")
+                if self.chatconn.type == "server":
+                    self.conn_text.set("No Clients")
+                else:
+                    self.conn_text.set("Not Connected")
+                
             self.conn_text.x = self.conn_text.y = 0
             self.conn_text.x, self.conn_text.y = root_rect(Constants.SCREEN_SIZE, self.conn_text.get_rect(),
             center_x=True, bottom_y=True
