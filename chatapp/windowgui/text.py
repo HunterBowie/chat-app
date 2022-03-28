@@ -14,10 +14,12 @@ class Text:
         "color": Colors.BLACK
     }
 
-    def __init__(self, x, y, string, format=default_format, newline_width=None):
+    def __init__(self, x, y, string, format=None, newline_width=None):
         self.format = format
+        if self.format is None:
+            self.format = self.default_format.copy()
         for setting, value in self.default_format.items():
-            if setting not in format:
+            if setting not in self.format:
                 self.format[setting] = value
         self.x = x
         self.y = y

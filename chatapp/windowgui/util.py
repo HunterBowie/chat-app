@@ -16,7 +16,8 @@ class Colors:
     GOLD = (200, 200, 30)
     GREY = (128, 128, 128)
     LIGHT_YELLOW = (200, 200, 0)
-    LIGHT_RED = (255, 50, 50) 
+    LIGHT_RED = (255, 50, 50)
+    LIGHT_GREEN = (50, 200, 50)
 
 def get_surf(size, color, alpha):
     surf = pygame.Surface(size, pygame.SRCALPHA)

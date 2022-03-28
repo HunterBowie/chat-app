@@ -25,7 +25,7 @@ class ChatConn:
 
     HEADER = 16
 
-    LISTENING_TIMEOUT = 0.2
+    SOCKET_TIMEOUT = 0.2
 
     class MsgType:
         INIT = 0
@@ -39,14 +39,14 @@ class ChatConn:
         self.addr = (ip, self.PORT)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.running = True
-        self.connections = {}
+        self.connections = []
         self.send_queue = []
         self.recv_queue = []
 
         if self.type == "server":
             try:
                 self.socket.bind(self.addr)
-                self.socket.settimeout(self.LISTENING_TIMEOUT)
+                self.socket.settimeout(self.SOCKET_TIMEOUT)
             except OSError:
                 raise ConnPortTaken("cannot host two servers on the same computer")
             print("[SERVER] bound to address")
@@ -71,11 +71,17 @@ class ChatConn:
             print(f"[CLIENT] connected to server: {conn_id}")
             threading.Thread(target=self._server_handler, args=[conn_id]).start()
     
-    def get_msg(self)
-        pass
+    def has_msg(self):
+        if self.recv_queue:
+            return True
+        return False
+
+    def get_msg(self):
+        # print(f"[GENERAL] new msg pulled to chatbox: {self.recv_queue[-1]}")
+        return self.recv_queue.pop(-1)
 
     def send_msg(self, content):
-        pass
+        self.send_queue.append((content, self.connections.copy()))
     
     def _send(self, conn, data, msg_type):
         data = data.encode()
@@ -119,7 +125,7 @@ class ChatConn:
 
         self.connections.append(conn_id)
 
-        conn.settimeout(self.LISTENING_TIMEOUT)
+        conn.settimeout(self.SOCKET_TIMEOUT)
 
         print(f"[SERVER] new client {conn_id}")
 
@@ -133,6 +139,11 @@ class ChatConn:
             if msg_type == self.MsgType.CHAT:
                 print("[SERVER] recived msg")
                 self.recv_queue.append({"id": conn_id, "content": data})
+                if len(self.connections) > 1:
+                    mod_connections = self.connections.copy()
+                    mod_connections.remove(conn_id)
+                    self.send_queue.append((data, mod_connections))
+
             elif msg_type == self.MsgType.BREAK:
                 print("[SERVER] client disconnect")     
                 break
@@ -141,11 +152,37 @@ class ChatConn:
                 self._send(conn, "", self.MsgType.BREAK)
                 break
             
-            if self.send_queue:
-                self._send(conn, self.send_queue.pop(0), self.MsgType.CHAT)
-                print("[SERVER] sent msg")
-            else:
-                self._send(conn, "", self.MsgType.EMPTY)
+            msg_item = None
+            delete_item = False
+            for new_item in self.send_queue:
+                if conn_id in new_item[1]:
+                    msg_item = new_item
+                    msg_item[1].remove(conn_id)
+                    if len(msg_item[1]) == 0:
+                        delete_item = True
+            if delete_item:
+                self.send_queue.remove(msg_item)
+            
+            # print(f"[SERVER] Preparing msg item {msg_item} from {self.send_queue}")
+
+            excepting = True
+            while excepting:
+                try:
+                    if msg_item is not None:
+                        self._send(conn, msg_item[0], self.MsgType.CHAT)
+                        print(f"[SERVER] sent msg {msg_item[0]}")
+                    else:
+                        self._send(conn, "", self.MsgType.EMPTY)
+                except socket.timeout:
+                    pass
+
+                else:
+                    excepting = False
+                
+                if not self.running:
+                    self.connections.remove(conn_id)
+                    return None
+
         self.connections.remove(conn_id)
         
     
@@ -154,11 +191,31 @@ class ChatConn:
     def _server_handler(self, conn_id):
         self.connections.append(conn_id)
         while self.running:
-            if self.send_queue:
-                self._send(self.socket, self.send_queue.pop(0), self.MsgType.CHAT)
-                print("[CLIENT] sent msg")
-            else:
-                self._send(self.socket, "", self.MsgType.EMPTY)
+            msg_item = None
+            delete_item = False
+            for new_item in self.send_queue:
+                if conn_id in new_item[1]:
+                    msg_item = new_item
+                    if len(msg_item[1]) == 1:
+                        delete_item = True
+            if delete_item:
+                self.send_queue.remove(msg_item)
+            
+            # print(f"[CLIENT] Preparing msg item {msg_item} from {self.send_queue}")
+
+            excepting = True
+            while excepting:
+                try:
+                    if msg_item is not None:
+                        self._send(self.socket, msg_item[0], self.MsgType.CHAT)
+                        print(f"[CLIENT] sent msg {msg_item[0]}")
+                    else:
+                        self._send(self.socket, "", self.MsgType.EMPTY)
+                except socket.timeout:
+                    pass
+
+                else:
+                    excepting = False
             
             msg_type, data = self._recv(self.socket)
             if msg_type == self.MsgType.CHAT:

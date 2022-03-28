@@ -31,8 +31,9 @@ class ChatUI(UIManager):
         self.info_text = Text(0, -75, "")
         self.ip_text = Text(0, -35, "")
         self.id_text = Text(0, 10, chatconn.id)
-        self.conn_text = Text(0, 0, "Not Connected", {"color": Colors.RED})
-        self.conn_text_value = False
+        self.conn_text = Text(0, 0, "")
+        self.conn_text_value = None
+        self.conn_text_num = 0
 
         self.conn_text.x, self.conn_text.y = root_rect(Constants.SCREEN_SIZE, self.conn_text.get_rect(),
         center_x=True, bottom_y=True
@@ -63,25 +64,13 @@ class ChatUI(UIManager):
             Constants.SCREEN_SIZE, self.ip_text.get_rect(),
             center_x=True, bottom_y=True
         )
-
-    def update(self):
-        super().update()
-        for i in range(len(self.chatconn.in_queue)):
-            msg = self.chatconn.in_queue.pop(0)
-            self.chatbox.new_msg(msg)
+    
+    def update_info_text(self):
         
-        connected = False
-        if self.chatconn.connections:
-            connected = True
-        
-        if connected != self.conn_text_value:
-            # Client: Connected Disconnected
-            # Server: No Clients, # Clients 
-            self.conn_text_value = connected
-            if connected:
+            if self.conn_text_value:
                 self.conn_text.format["color"] = Colors.GREEN
                 if self.chatconn.type == "server":
-                    self.conn_text.set(f"{len(self.chatconn.connections)} Clients")
+                    self.conn_text.set(f"Clients: {len(self.chatconn.connections)}")
                 else:
                     self.conn_text.set("Connected")
                 
@@ -96,6 +85,27 @@ class ChatUI(UIManager):
             self.conn_text.x, self.conn_text.y = root_rect(Constants.SCREEN_SIZE, self.conn_text.get_rect(),
             center_x=True, bottom_y=True
             )
+
+    def update(self):
+        super().update()
+        while(self.chatconn.has_msg()):
+            msg = self.chatconn.get_msg()
+            self.chatbox.new_msg(msg)
+        
+        connected = False
+        if self.chatconn.connections:
+            connected = True
+        
+        if connected != self.conn_text_value:
+            # Client: Connected Disconnected
+            # Server: No Clients, # Clients 
+            self.conn_text_value = connected
+            self.update_info_text()
+        
+        if self.conn_text_num != len(self.chatconn.connections):
+            self.conn_text_num = len(self.chatconn.connections)
+            self.update_info_text
+            
             
         self.chatbox.render(self.window.screen)
         self.info_text.render(self.window.screen)
@@ -117,9 +127,11 @@ class ChatUI(UIManager):
 
         if event.type == UIEvent.TEXTBOX_POST:
             data = event.ui_element.text.string
-            event.ui_element.text.set("")
-            self.chatconn.out_queue.append(data)
-            self.chatbox.new_msg({"id":self.chatconn.id, "content": data})
+            if data.strip() != "":
+
+                event.ui_element.text.set("")
+                self.chatconn.send_msg(data)
+                self.chatbox.new_msg({"id":self.chatconn.id, "content": data})
 
     def stop(self):
         self.chatconn.running = False
@@ -242,7 +254,20 @@ class StartUI(UIManager):
         if event.type == UIEvent.TEXTBOX_POST:
             if event.ui_id == "id_box":
                 id = event.ui_element.text.string
-                self.window.ui_manager = ConnectUI(self.window, id)
+                if id.strip() == "":
+                    flash = Flash(0, 0, Text(0, 0, "enter a valid username", {"size": 20}),
+                     (240, 50), Colors.LIGHT_YELLOW)
+                    flash.x, flash.y = root_rect(Constants.SCREEN_SIZE, flash.surface.get_rect(),
+                    center_x=True, top_y=True)
+                    self.window.flash(flash)
+                else:
+                    if id.strip() == "f":
+                        flash = Flash(0, 0, Text(0, 0, "nice username!", {"size": 20}),
+                        (240, 50), Colors.LIGHT_GREEN)
+                        flash.x, flash.y = root_rect(Constants.SCREEN_SIZE, flash.surface.get_rect(),
+                        center_x=True, top_y=True)
+                        self.window.flash(flash)
+                    self.window.ui_manager = ConnectUI(self.window, id)
                 
                 
     
