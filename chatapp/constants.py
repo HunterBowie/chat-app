@@ -6,7 +6,7 @@ class Constants:
     SCREEN_SIZE = SCREEN_WIDTH, SCREEN_HEIGHT
 
     WIN_OS_NAME = "nt"
-    HAS_INTERNET = False
+    HAS_INTERNET = True
 
 
 

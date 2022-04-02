@@ -55,6 +55,8 @@ class ChatConn:
 
         elif self.type == "client":
             try:
+                print("got here")
+                self.socket.settimeout(self.SOCKET_TIMEOUT)
                 self.socket.connect(self.addr)
             except ConnectionRefusedError:
                 raise ConnRefused(f"client unable to find server at IP \"{self.addr[0]}\"")

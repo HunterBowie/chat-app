@@ -16,7 +16,7 @@ class ChatUI(UIManager):
         self.chatconn = chatconn
 
         self.ui = [
-            TextBox("send_box", 0, 150, 300, 50),
+            TextBox("send_box", 0, 140, 300, 50),
             Button("back_btn", 10, 0, 50, 50, top_img=Assets.IMAGES["arrow_left"], hide_button=True)
 
         ]
@@ -28,8 +28,8 @@ class ChatUI(UIManager):
             center_x=True, center_y=True
         )
 
-        self.info_text = Text(0, -75, "")
-        self.ip_text = Text(0, -35, "")
+        self.info_text = Text(0, -85, "")
+        self.ip_text = Text(0, -35, "", {"size": 20})
         self.id_text = Text(0, 10, chatconn.id)
         self.conn_text = Text(0, 0, "")
         self.conn_text_value = None
@@ -45,12 +45,14 @@ class ChatUI(UIManager):
         if self.chatconn.type == "server":
             self.info_text.set("Server")
             if Constants.HAS_INTERNET:
-                self.ip_text.set(ChatConn.IP_PRIVATE)
+                self.ip_text.set(f"public: {ChatConn.IP_PUBLIC}\nprivate: {ChatConn.IP_PRIVATE}")
             else:
                 self.ip_text.set("NONE")
         else:
             self.info_text.set("Client")
             if Constants.HAS_INTERNET:
+                self.ip_text.y -= 5
+                self.ip_text.format["size"] = 30
                 self.ip_text.set(self.chatconn.addr[0])
             else:
                 self.ip_text.set("NONE")
@@ -66,25 +68,24 @@ class ChatUI(UIManager):
         )
     
     def update_info_text(self):
-        
-            if self.conn_text_value:
-                self.conn_text.format["color"] = Colors.GREEN
-                if self.chatconn.type == "server":
-                    self.conn_text.set(f"Clients: {len(self.chatconn.connections)}")
-                else:
-                    self.conn_text.set("Connected")
-                
+        if self.conn_text_value:
+            self.conn_text.format["color"] = Colors.GREEN
+            if self.chatconn.type == "server":
+                self.conn_text.set(f"Clients: {len(self.chatconn.connections)}")
             else:
-                self.conn_text.format["color"] = Colors.RED
-                if self.chatconn.type == "server":
-                    self.conn_text.set("No Clients")
-                else:
-                    self.conn_text.set("Not Connected")
+                self.conn_text.set("Connected")
+            
+        else:
+            self.conn_text.format["color"] = Colors.RED
+            if self.chatconn.type == "server":
+                self.conn_text.set("No Clients")
+            else:
+                self.conn_text.set("Not Connected")
                 
-            self.conn_text.x = self.conn_text.y = 0
-            self.conn_text.x, self.conn_text.y = root_rect(Constants.SCREEN_SIZE, self.conn_text.get_rect(),
-            center_x=True, bottom_y=True
-            )
+        self.conn_text.x = self.conn_text.y = 0
+        self.conn_text.x, self.conn_text.y = root_rect(Constants.SCREEN_SIZE, self.conn_text.get_rect(),
+        center_x=True, bottom_y=True
+        )
 
     def update(self):
         super().update()
@@ -104,7 +105,7 @@ class ChatUI(UIManager):
         
         if self.conn_text_num != len(self.chatconn.connections):
             self.conn_text_num = len(self.chatconn.connections)
-            self.update_info_text
+            self.update_info_text()
             
             
         self.chatbox.render(self.window.screen)
@@ -112,6 +113,19 @@ class ChatUI(UIManager):
         self.ip_text.render(self.window.screen)
         self.id_text.render(self.window.screen)
         self.conn_text.render(self.window.screen)
+        
+        if not self.chatconn.running:
+            msg = ""
+            if self.chatconn.type == "client":
+                msg = "server quit unexpectly"
+            else:
+                msg = "crashed"
+            self.window.ui_manager = ConnectUI(self.window, self.chatconn.id)
+            flash = Flash(0, 0, Text(0, 0, msg, {"size": 20}),
+            (240, 50), Colors.LIGHT_YELLOW)
+            flash.x, flash.y = root_rect(Constants.SCREEN_SIZE, flash.surface.get_rect(),
+            center_x=True, top_y=True)
+            self.window.flash(flash)
 
     def eventloop(self, event):
         super().eventloop(event)
