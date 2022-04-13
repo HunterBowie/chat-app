@@ -219,7 +219,14 @@ class ChatConn:
                 else:
                     excepting = False
             
-            msg_type, data = self._recv(self.socket)
+            excepting = True
+            while excepting:
+                try:
+                    msg_type, data = self._recv(self.socket)
+                except socket.timeout:
+                    pass
+                else:
+                    excepting = False
             if msg_type == self.MsgType.CHAT:
                 print("[CLIENT] recieved msg")
                 self.recv_queue.append({"id": conn_id, "content": data})
