@@ -1,4 +1,6 @@
 import pygame, random, threading
+
+from .windowgui.window import Window
 from .windowgui.ui import Button, TextBox
 from .windowgui.util import root_rect, Flash, Colors
 from .windowgui.text import Text
@@ -6,11 +8,12 @@ from .constants import Constants
 from .windowgui.ui import UIManager, UIEvent
 from .chatbox import ChatBox
 from .chatconn import ChatConn
-from .util import ConnIDTaken, ConnInvalidIP, ConnPortTaken, ConnRefused
+from .exceptions import ConnIDTaken, ConnInvalidIP, ConnPortTaken, ConnRefused
 from .assets import Assets
 
 class ChatUI(UIManager):
-    def __init__(self, window, chatconn):
+    """Repersents the UI for the chat"""
+    def __init__(self, window: Window, chatconn: ChatConn):
         super().__init__(window)
         self.chatbox = ChatBox(25, 60, Constants.SCREEN_WIDTH-50, 310, chatconn.id)
         self.chatconn = chatconn
@@ -150,9 +153,8 @@ class ChatUI(UIManager):
     def stop(self):
         self.chatconn.running = False
   
-
-
 class JoinUI(UIManager):
+    """Repersents the UI for the enter IP address menu."""
     def __init__(self, window, id):
         super().__init__(window)
         self.ui = [
@@ -205,15 +207,12 @@ class JoinUI(UIManager):
                 else:
                     self.window.ui_manager = ChatUI(self.window, chatconn)
 
-                
-                
-    
     def update(self):
         super().update()
         self.ip_text.render(self.window.screen)
 
-
 class ConnectUI(UIManager):
+    """Repersents the UI for the join/host menu."""
     def __init__(self, window, id):
         super().__init__(window)
         self.ui = [
@@ -248,6 +247,7 @@ class ConnectUI(UIManager):
                     self.window.ui_manager = ui_manager
 
 class StartUI(UIManager):
+    """Repersents the UI for the start menu."""
     def __init__(self, window):
         super().__init__(window)
         self.ui = [
@@ -281,9 +281,7 @@ class StartUI(UIManager):
                         flash.x, flash.y = root_rect(Constants.SCREEN_SIZE, flash.surface.get_rect(),
                         center_x=True, top_y=True)
                         self.window.flash(flash)
-                    self.window.ui_manager = ConnectUI(self.window, id)
-                
-                
+                    self.window.ui_manager = ConnectUI(self.window, id)           
     
     def update(self):
         super().update()

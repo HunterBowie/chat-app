@@ -1,8 +1,8 @@
 import socket, threading, requests
 
-from chatapp.constants import Constants   
+from .constants import Constants   
 from .windowgui.timers import RealTimer 
-from .util import ConnIDTaken, ConnInvalidIP, ConnPortTaken, ConnRefused
+from .exceptions import ConnIDTaken, ConnInvalidIP, ConnPortTaken, ConnRefused
 
 def _get_private_ip():
     if Constants.HAS_INTERNET:
@@ -18,6 +18,7 @@ def _get_public_ip():
     return ""
 
 class ChatConn:
+    """Repersents the client/server connection."""
     PORT = 5007
 
     IP_PRIVATE = _get_private_ip()
@@ -28,6 +29,7 @@ class ChatConn:
     SOCKET_TIMEOUT = 0.2
 
     class MsgType:
+        """Repersents the type of msg being sent."""
         INIT = 0
         BREAK = 1
         CHAT = 2
@@ -85,7 +87,7 @@ class ChatConn:
     def send_msg(self, content):
         self.send_queue.append((content, self.connections.copy()))
     
-    def _send(self, conn, data, msg_type):
+    def _send(self, conn, data, msg_type: int):
         data = data.encode()
         data_len = len(data)
         meta = f"{data_len},{msg_type}".encode()
@@ -98,7 +100,7 @@ class ChatConn:
             meta = conn.recv(self.HEADER).decode()
         except ConnectionResetError:
             self.running = False
-            raise ConnectionResetError("shit me connection rest")
+            raise ConnectionResetError("connection reset")
         meta = meta.split(",")
         data_len, msg_type = int(meta[0]), int(meta[1])
         data = conn.recv(data_len).decode()
@@ -115,7 +117,6 @@ class ChatConn:
                 threading.Thread(target=self._client_handler, args=[conn]).start()
         self.socket.close()
         
-
     def _client_handler(self, conn):
         
         self._send(conn, self.id, self.MsgType.INIT)
@@ -186,10 +187,7 @@ class ChatConn:
                     return None
 
         self.connections.remove(conn_id)
-        
-    
 
-    
     def _server_handler(self, conn_id):
         self.connections.append(conn_id)
         while self.running:

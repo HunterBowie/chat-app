@@ -1,20 +1,20 @@
-from email import message
 import pygame
 from .windowgui.text import Text, get_text_size, render_text_background
 from .windowgui.util import Colors, get_surf, render_border
 
 class ChatBox:
-    def __init__(self, x, y, width, height, id):
+    """Repersents the chat UI."""
+    def __init__(self, x: int, y: int, width: int, height: int, id: str):
         self.rect = pygame.Rect(x, y, width, height)
         self.messages = []
         self.id = id
         self.scroll = 0
     
-    def new_msg(self, msg):
+    def new_msg(self, msg: dict):
         self.scroll = 0
         self.messages.insert(0, msg)
     
-    def render(self, surface):
+    def render(self, surface: pygame.Surface):
         chatsurf = pygame.Surface(self.rect.size, pygame.SRCALPHA)
         chatsurf.blit(get_surf(self.rect.size, Colors.GREY, 100), (0, 0))
 
