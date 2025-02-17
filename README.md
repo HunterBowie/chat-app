@@ -6,9 +6,11 @@
 
 This is a basic messaging software I made from scratch using pygame and sockets in python. It allows users to enter a username and join or host a server. Then users can send messages to other users within that network. The functionality of the buttons, textboxes, temporary banners, and menus is entirely designed from scratch with a graphics library called pygame. The networking aspect is built with a low level python networking library called sockets.
 
-<img src="entering-name.png" alt="Description" style="width:30%;">
-<img src="host-join.png" alt="Description" style="width:30%;">
-<img src="entering-ip.png" alt="Description" style="width:30%;">
+<p align="center">
+    <img src="entering-name.png" alt="Description" style="width:30%;">
+    <img src="host-join.png" alt="Description" style="width:30%;">
+    <img src="entering-ip.png" alt="Description" style="width:30%;">
+</p>
 
 ## Networking Example
 
