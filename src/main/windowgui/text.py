@@ -36,7 +36,7 @@ class Text:
                 new_line = "" 
                 for char in line:
                     new_line = new_line + char
-                    if get_text_size(new_line, self.format)[0] >= self.newline_width:
+                    if get_text_size(new_line, self.format)[0] >= self.newline_width and char == " ":
                         new_lines.append(new_line.strip())
                         new_line = ""
                 if new_line:
