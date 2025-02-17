@@ -57,7 +57,6 @@ class ChatConn:
 
         elif self.type == "client":
             try:
-                print("got here")
                 self.socket.settimeout(self.SOCKET_TIMEOUT)
                 self.socket.connect(self.addr)
             except ConnectionRefusedError:
@@ -81,7 +80,6 @@ class ChatConn:
         return False
 
     def get_msg(self):
-        # print(f"[GENERAL] new msg pulled to chatbox: {self.recv_queue[-1]}")
         return self.recv_queue.pop(-1)
 
     def send_msg(self, content):
@@ -118,6 +116,7 @@ class ChatConn:
         self.socket.close()
         
     def _client_handler(self, conn):
+        """Handle a connection to a client."""
         
         self._send(conn, self.id, self.MsgType.INIT)
 
@@ -163,10 +162,10 @@ class ChatConn:
                     msg_item[1].remove(conn_id)
                     if len(msg_item[1]) == 0:
                         delete_item = True
+                        
             if delete_item:
                 self.send_queue.remove(msg_item)
             
-            # print(f"[SERVER] Preparing msg item {msg_item} from {self.send_queue}")
 
             excepting = True
             while excepting:
@@ -189,6 +188,7 @@ class ChatConn:
         self.connections.remove(conn_id)
 
     def _server_handler(self, conn_id):
+        """Handle a connection to a server."""
         self.connections.append(conn_id)
         while self.running:
             msg_item = None
@@ -201,8 +201,6 @@ class ChatConn:
             if delete_item:
                 self.send_queue.remove(msg_item)
             
-            # print(f"[CLIENT] Preparing msg item {msg_item} from {self.send_queue}")
-
             excepting = True
             while excepting:
                 try:
